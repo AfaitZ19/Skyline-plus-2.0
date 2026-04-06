@@ -1,0 +1,1541 @@
+<!DOCTYPE html>
+
+<html lang="th">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>เซลล์ — Skyline Plus v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ion-color-primary:#3880ff;--ion-color-success:#2dd36f;--ion-color-warning:#ffc409;--ion-color-danger:#eb445a;
+  --sky-navy:#0a1628;--sky-bg:#f0f4f8;--sky-card:#fff;--sky-border:#e2e8f0;
+  --sky-text:#0f172a;--sky-muted:#64748b;--sky-light:#94a3b8;
+  --sky-amber:#d97706;--ion-font-family:"Noto Sans Thai",'Roboto',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:var(--ion-font-family);background:var(--sky-bg);color:var(--sky-text);max-width:430px;margin:0 auto;min-height:100vh}
+.ion-page{display:none;flex-direction:column;min-height:100vh}.ion-page.active{display:flex}
+/* TOOLBAR */
+.ion-header{position:sticky;top:0;z-index:100}
+.ion-toolbar{padding:13px 16px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#78350f,#b45309)}
+.toolbar-title{font-size:16px;font-weight:800;color:#fff}
+.toolbar-sub{font-size:11px;color:rgba(255,255,255,.5);margin-top:1px}
+.toolbar-end{display:flex;gap:8px;align-items:center}
+.back-btn{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.15);border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.avatar{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff}
+.nb{position:relative}.notif-btn{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.12);border:none;color:#fff;font-size:16px;cursor:pointer}
+.nd{position:absolute;top:5px;right:5px;width:8px;height:8px;border-radius:50%;background:#ef4444;border:2px solid #78350f}
+/* CONTENT */
+.ion-content{flex:1;padding:14px;display:flex;flex-direction:column;gap:12px;padding-bottom:84px;background:var(--sky-bg);overflow-y:auto}
+/* TAB BAR */
+.ion-tab-bar{background:#fff;border-top:1px solid var(--sky-border);display:grid;grid-template-columns:repeat(5,1fr);padding:8px 0 20px;position:fixed;bottom:0;left:0;right:0;z-index:100;max-width:430px;margin:0 auto}
+.ion-tab-btn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px;border:none;background:transparent;cursor:pointer;font-family:var(--ion-font-family)}
+.tab-icon{font-size:20px}.tab-lbl{font-size:10px;font-weight:600;color:var(--sky-light)}
+.tab-active .tab-lbl{color:var(--sky-amber);font-weight:800}
+/* CARDS */
+.card{background:var(--sky-card);border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.07);overflow:hidden}
+.card-body{padding:14px}
+.card-title{font-size:11px;font-weight:800;color:var(--sky-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat-card{background:var(--sky-card);border-radius:14px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.07);cursor:pointer;position:relative;overflow:hidden;transition:transform .15s;border-top:3px solid var(--sky-amber)}
+.stat-card:active{transform:scale(.97)}
+.stat-card.danger{border-top-color:#dc2626}.stat-card.success{border-top-color:#16a34a}.stat-card.blue{border-top-color:#1e40af}
+.stat-title{font-size:11px;color:var(--sky-muted);font-weight:500;margin-bottom:4px}
+.stat-value{font-size:26px;font-weight:800;font-family:'IBM Plex Mono',monospace;line-height:1.1}
+.stat-sub{font-size:10px;color:var(--sky-light);margin-top:3px}
+.stat-emoji{position:absolute;right:10px;bottom:8px;font-size:22px;opacity:.1}
+/* AI BANNER */
+.ai-banner{background:linear-gradient(135deg,#78350f,#92400e);border-radius:14px;padding:14px;color:#fff;position:relative;overflow:hidden}
+.ai-banner::after{content:'💡';position:absolute;right:-4px;bottom:-10px;font-size:60px;opacity:.06}
+.ai-label{font-size:10px;font-weight:800;letter-spacing:1px;opacity:.55;margin-bottom:6px}
+.ai-text{font-size:13px;line-height:1.75;opacity:.9}.ai-text b{color:#fbbf24}
+/* LIST */
+.list-item{background:var(--sky-card);border-radius:12px;padding:13px 14px;box-shadow:0 1px 4px rgba(0,0,0,.07);cursor:pointer;display:flex;gap:12px;align-items:flex-start;margin-bottom:8px;transition:transform .15s}
+.list-item:active{transform:scale(.98)}.list-item:last-child{margin-bottom:0}
+.item-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.item-body{flex:1;min-width:0}.item-title{font-size:13px;font-weight:700;margin-bottom:2px}.item-sub{font-size:11px;color:var(--sky-muted);line-height:1.5}
+.item-end{text-align:right;flex-shrink:0}
+/* CHIPS */
+.chip{display:inline-flex;padding:3px 8px;border-radius:6px;font-size:10px;font-weight:700}
+.chip-success{background:#dcfce7;color:#14532d}.chip-danger{background:#fee2e2;color:#991b1b}
+.chip-primary{background:#dbeafe;color:#1e40af}.chip-warning{background:#fef3c7;color:#78350f}
+.chip-gray{background:#f1f5f9;color:#475569}.chip-purple{background:#f3e8ff;color:#6b21a8}
+/* PURCHASE STATUS — ใช้ PurchaseStatus enum จาก DB */
+.status-pill{display:inline-flex;padding:3px 9px;border-radius:7px;font-size:10px;font-weight:700;font-family:'IBM Plex Mono',monospace}
+.s-following    {background:#fef9c3;color:#713f12}      /* Following */
+.s-purchased    {background:#dcfce7;color:#14532d}      /* Purchased */
+.s-notpurchased {background:#fee2e2;color:#991b1b}      /* NotPurchased */
+.s-pending      {background:#fce7f3;color:#9d174d}      /* PendingDecision */
+.s-returned     {background:#f1f5f9;color:#475569}      /* Returned */
+/* POOL BADGES */
+/* Machine status chips for sales UI */
+.s-central   {background:#ccfbf1;color:#134e4a;font-weight:700}
+.s-withsales {background:#dbeafe;color:#1e40af;font-weight:700}
+.s-withpatient{background:#fce7f3;color:#9d174d;font-weight:700}
+.s-reserved  {background:#fef9c3;color:#713f12;font-weight:700}
+.s-sold      {background:#f1f5f9;color:#475569;font-weight:700}
+/* SECTION */
+.section-title{font-size:11px;font-weight:800;color:var(--sky-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
+/* SEGMENT */
+.segment-bar{display:flex;background:#f0f4f8;border-radius:10px;padding:3px;margin-bottom:12px}
+.seg-btn{flex:1;padding:8px;border:none;background:transparent;border-radius:8px;font-size:11px;font-weight:600;font-family:var(--ion-font-family);color:var(--sky-muted);cursor:pointer;transition:all .2s}
+.seg-btn.active{background:#fff;color:var(--sky-text);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;display:none;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal-sheet{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:430px;max-height:92vh;overflow-y:auto;padding:20px 20px 32px}
+.modal-handle{width:36px;height:4px;background:#e2e8f0;border-radius:2px;margin:0 auto 16px}
+.modal-title{font-size:17px;font-weight:800;margin-bottom:3px}.modal-sub{font-size:12px;color:var(--sky-muted);margin-bottom:16px}
+.form-group{margin-bottom:12px}
+.form-label{font-size:11px;font-weight:700;color:var(--sky-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;display:block}
+.form-input{width:100%;padding:12px 14px;border:1.5px solid var(--sky-border);border-radius:10px;font-size:14px;font-family:var(--ion-font-family);outline:none;color:var(--sky-text)}
+.form-input:focus{border-color:var(--sky-amber)}
+.form-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2364748b' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+.info-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f4f8}
+.info-row:last-child{border-bottom:none}
+.info-key{font-size:12px;color:var(--sky-muted)}.info-val{font-size:12px;font-weight:700;text-align:right}
+.divider{height:1px;background:#f0f4f8;margin:14px 0}
+.step-num{width:28px;height:28px;border-radius:50%;background:var(--sky-amber);color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.step-header{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.btn-block{width:100%;padding:14px;border-radius:12px;font-size:14px;font-weight:700;font-family:var(--ion-font-family);border:none;cursor:pointer;margin-top:8px;transition:transform .15s}
+.btn-block:active{transform:scale(.98)}
+.btn-amber{background:var(--sky-amber);color:#fff}.btn-green{background:#16a34a;color:#fff}
+.btn-navy{background:var(--sky-navy);color:#fff}.btn-danger{background:#fee2e2;color:#dc2626}
+.btn-blue{background:#1e40af;color:#fff}
+/* RECEIPT */
+.receipt-wrap{background:#fff;border:1px dashed #cbd5e1;border-radius:14px;padding:18px;font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:2}
+.receipt-wrap hr{border:none;border-top:1px dashed #e2e8f0;margin:8px 0}
+.receipt-row{display:flex;justify-content:space-between}
+/* PROGRESS BAR */
+.progress-row{margin-bottom:8px}
+.progress-head{display:flex;justify-content:space-between;margin-bottom:4px;font-size:12px}
+.progress-track{height:6px;background:#f0f4f8;border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;border-radius:3px}
+/* INSPECT ALERT */
+.inspect-alert{background:linear-gradient(135deg,#dc2626,#b91c1c);border-radius:14px;padding:14px;color:#fff;cursor:pointer}
+/* BADGE */
+.badge{background:#dc2626;color:#fff;font-size:10px;font-weight:800;padding:2px 6px;border-radius:8px;margin-left:4px}
+/* POOL INDICATOR */
+.pool-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}
+/* TOAST */
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--sky-navy);color:#fff;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;transition:all .25s;z-index:400;white-space:nowrap;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.h-opt{padding:11px 14px;font-size:13px;cursor:pointer;border-bottom:1px solid #f0f4f8;font-family:var(--ion-font-family)}
+.h-opt:last-child{border-bottom:none}
+.h-opt:hover,.h-opt:active{background:#f0fdf4;color:#14532d}
+</style>
+</head>
+<body>
+
+<!-- PAGE: DASHBOARD -->
+
+<div class="ion-page active" id="pg-dash">
+  <div class="ion-header">
+    <div class="ion-toolbar">
+      <div><div class="toolbar-title">🤝 สวัสดี แอน</div><div class="toolbar-sub">ยอดเดือนนี้ 8 เครื่อง · อัตราขาย 45%</div></div>
+      <div class="toolbar-end">
+        <div class="nb"><button class="notif-btn" onclick="T('แจ้งเตือน 2 รายการ')">🔔</button><div class="nd"></div></div>
+        <div class="avatar">แ</div>
+      </div>
+    </div>
+  </div>
+  <div class="ion-content">
+    <!-- INSPECT ALERT -->
+    <div class="inspect-alert" onclick="O('m-inspect-alert')">
+      <div style="font-size:11px;font-weight:800;opacity:.7;margin-bottom:4px">⚠️ บริษัทเรียกตรวจเครื่องเดโม่</div>
+      <div style="font-size:14px;font-weight:800">D-007 · APEX iX Auto</div>
+      <div style="font-size:12px;opacity:.8;margin-top:4px">กรุณานำส่งสต๊อกภายใน 2 วัน · กดเพื่อยืนยัน</div>
+    </div>
+
+```
+<div class="ai-banner">
+  <div class="ai-label">💡 วันนี้</div>
+  <div class="ai-text">Follow-up วันนี้ <b>2 เคส</b> · เลยกำหนดคืน <b>3 ตัว</b> · Warranty ค้าง <b>2 รายการ</b></div>
+</div>
+
+<!-- MACHINES (separate from cases) -->
+<div class="section-title">🖥️ เครื่องของฉัน (Machines)</div>
+<div class="stats-grid" style="margin-bottom:4px">
+  <div class="stat-card" style="border-top-color:#1e40af" onclick="G('pg-my-machines')">
+    <div class="stat-title">WithSales</div>
+    <div class="stat-value">8</div>
+    <div class="stat-sub">อยู่กับฉัน</div>
+    <div class="stat-emoji">📟</div>
+  </div>
+  <div class="stat-card" style="border-top-color:#9d174d" onclick="G('pg-my-machines')">
+    <div class="stat-title">WithPatient</div>
+    <div class="stat-value">3</div>
+    <div class="stat-sub">อยู่กับคนไข้</div>
+    <div class="stat-emoji">🏥</div>
+  </div>
+</div>
+
+<!-- CASES (separate from machines) -->
+<div class="section-title">📋 เคสของฉัน (Cases)</div>
+<div class="stats-grid">
+  <div class="stat-card blue" onclick="G('pg-cases')">
+    <div class="stat-title">Active Trial</div>
+    <div class="stat-value">3</div>
+    <div class="stat-sub">ลูกค้าทดลองอยู่</div>
+    <div class="stat-emoji">🔬</div>
+  </div>
+  <div class="stat-card danger" onclick="G('pg-cases')">
+    <div class="stat-title">Follow-up วันนี้</div>
+    <div class="stat-value" style="color:#dc2626">2</div>
+    <div class="stat-sub">ต้องโทรหา</div>
+    <div class="stat-emoji">📞</div>
+  </div>
+  <div class="stat-card warning" onclick="G('pg-cases')">
+    <div class="stat-title">Pending Decision</div>
+    <div class="stat-value" style="color:#d97706">5</div>
+    <div class="stat-sub">รอตัดสินใจ</div>
+    <div class="stat-emoji">🤔</div>
+  </div>
+  <div class="stat-card success" onclick="G('pg-cases')">
+    <div class="stat-title">Conversion Rate</div>
+    <div class="stat-value" style="color:#16a34a">45%</div>
+    <div class="stat-sub">เดือนนี้</div>
+    <div class="stat-emoji">📈</div>
+  </div>
+</div>
+
+<!-- QUICK ACTIONS -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+  <button style="background:#fff;border-radius:14px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.07);border:none;font-family:var(--ion-font-family);transition:transform .15s" onclick="G('pg-request')" ontouchstart="">
+    <span style="font-size:30px">📋</span>
+    <span style="font-size:13px;font-weight:800">ขอเบิกเครื่อง</span>
+    <span style="font-size:10px;color:var(--sky-muted)">Sales / Demo</span>
+  </button>
+  <button style="background:#fff;border-radius:14px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.07);border:none;font-family:var(--ion-font-family);transition:transform .15s" onclick="O('m-confirm-sale')" ontouchstart="">
+    <span style="font-size:30px">💰</span>
+    <span style="font-size:13px;font-weight:800">Confirm Sale</span>
+    <span style="font-size:10px;color:var(--sky-muted)">→ Purchased + Warranty</span>
+  </button>
+</div>
+
+<!-- Quick actions -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+  <button style="background:#fff;border-radius:14px;padding:14px;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.07);border:none;font-family:var(--ion-font-family)" onclick="G('pg-cases')" ontouchstart="">
+    <span style="font-size:26px">📋</span>
+    <span style="font-size:12px;font-weight:800">สร้าง Case</span>
+    <span style="font-size:10px;color:var(--sky-muted)">Trial / Direct Sale</span>
+  </button>
+  <button style="background:#fff;border-radius:14px;padding:14px;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.07);border:none;font-family:var(--ion-font-family)" onclick="G('pg-my-machines')" ontouchstart="">
+    <span style="font-size:26px">📟</span>
+    <span style="font-size:12px;font-weight:800">My Machines</span>
+    <span style="font-size:10px;color:var(--sky-muted)">8 เครื่อง</span>
+  </button>
+</div>
+
+<!-- Warranty ค้าง -->
+<div>
+  <div class="section-title">🛡️ Warranty ค้างกรอก <span class="badge">2</span></div>
+  <div class="list-item" onclick="O('m-warranty-fill')">
+    <div class="item-icon" style="background:#fee2e2">🛡️</div>
+    <div class="item-body"><div class="item-title">XT-AUTO · SN-CADD3A00376</div><div class="item-sub">ขายไป 3 วันแล้ว ยังไม่กรอก</div></div>
+    <div class="item-end"><span class="chip chip-danger">ด่วน!</span></div>
+  </div>
+</div>
+```
+
+  </div>
+  <div class="ion-tab-bar">
+    <button class="ion-tab-btn tab-active"><span class="tab-icon">🏠</span><span class="tab-lbl">หลัก</span></button>
+    <button class="ion-tab-btn" onclick="G('pg-my-machines')"><span class="tab-icon">📟</span><span class="tab-lbl">Machines</span></button>
+    <button class="ion-tab-btn" onclick="G('pg-cases')"><span class="tab-icon">📋</span><span class="tab-lbl">Cases</span></button>
+    <button class="ion-tab-btn" onclick="G('pg-warranty')"><span class="tab-icon">🛡️</span><span class="tab-lbl">Warranty</span></button>
+    <button class="ion-tab-btn" onclick="G('pg-report')"><span class="tab-icon">📊</span><span class="tab-lbl">รายงาน</span></button>
+  </div>
+</div>
+
+<!-- PAGE: REQUEST -->
+
+<div class="ion-page" id="pg-request">
+  <div class="ion-header"><div class="ion-toolbar">
+    <button class="back-btn" onclick="G('pg-dash')">←</button>
+    <div><div class="toolbar-title">ขอเบิกเครื่อง</div><div class="toolbar-sub">เลือกประเภทก่อน</div></div>
+    <div class="avatar">แ</div>
+  </div></div>
+  <div class="ion-content">
+    <!-- Pool selector -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px">
+      <div id="pool-sales-card" style="border-radius:12px;padding:14px;border:2px solid #16a34a;background:#f0fdf4;cursor:pointer;text-align:center" onclick="selectPool('sales')">
+        <div style="font-size:26px;margin-bottom:6px">💰</div>
+        <div style="font-size:13px;font-weight:800">Sales Stock</div>
+        <div style="font-size:10px;color:var(--sky-muted);margin-top:3px;line-height:1.4">สำรองที่ รพ.<br>ขายได้เลย</div>
+      </div>
+      <div id="pool-demo-card" style="border-radius:12px;padding:14px;border:2px solid var(--sky-border);background:#fff;cursor:pointer;text-align:center" onclick="selectPool('demo')">
+        <div style="font-size:26px;margin-bottom:6px">🔬</div>
+        <div style="font-size:13px;font-weight:800">Demo</div>
+        <div style="font-size:10px;color:var(--sky-muted);margin-top:3px;line-height:1.4">ให้ลูกค้าทดลอง<br>ต้องคืนเสมอ</div>
+      </div>
+    </div>
+
+```
+<!-- Sales Form -->
+<div id="form-sales">
+  <div class="card"><div class="card-body">
+    <div class="card-title">Sales Stock — รายการขอเบิก</div>
+    <div class="form-group"><label class="form-label">วันที่ต้องการรับเครื่อง *</label><input class="form-input" type="date" value="2026-03-25"></div>
+    <div class="form-group">
+<label class="form-label">โรงพยาบาล *</label>
+<div style="position:relative">
+  <input class="form-input" id="h-input-loan" placeholder="พิมพ์เพื่อค้นหา หรือเลือกจากรายการ..." oninput="filterHospital(this,'h-list-loan')" onfocus="showHospital('h-list-loan')" onblur="setTimeout(()=>hideHospital('h-list-loan'),200)" autocomplete="off">
+  <div id="h-list-loan" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid #e2e8f0;border-top:none;border-radius:0 0 10px 10px;z-index:99;max-height:200px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,.1)">
+    <div class="h-opt" onclick="pickHospital('h-input-loan','h-list-loan',this)">โรงพยาบาลจุฬาลงกรณ์ สภากาชาดไทย</div>
+    <div class="h-opt" onclick="pickHospital('h-input-loan','h-list-loan',this)">โรงพยาบาลรามาธิบดี</div>
+    <div class="h-opt" onclick="pickHospital('h-input-loan','h-list-loan',this)">โรงพยาบาลศิริราช</div>
+    <div class="h-opt" onclick="pickHospital('h-input-loan','h-list-loan',this)">โรงพยาบาลพระมงกุฎเกล้า</div>
+    <div class="h-opt" onclick="pickHospital('h-input-loan','h-list-loan',this)">โรงพยาบาลภูมิพลอดุลยเดช</div>
+    <div class="h-opt" onclick="pickHospital('h-input-loan','h-list-loan',this)">โรงพยาบาลตำรวจ</div>
+    <div class="h-opt" onclick="pickHospital('h-input-loan','h-list-loan',this)">โรงพยาบาลเลิดสิน</div>
+    <div class="h-opt" onclick="pickHospital('h-input-loan','h-list-loan',this)">โรงพยาบาลนพรัตนราชธานี</div>
+    <div class="h-opt" onclick="pickHospital('h-input-loan','h-list-loan',this)">โรงพยาบาลบำราศนราดูร</div>
+    <div class="h-opt" onclick="pickHospital('h-input-loan','h-list-loan',this)">โรงพยาบาลเวชศาสตร์เขตร้อน</div>
+    <div class="h-opt" onclick="pickHospital('h-input-loan','h-list-loan',this)">โรงพยาบาลสมิติเวช สุขุมวิท</div>
+    <div class="h-opt" onclick="pickHospital('h-input-loan','h-list-loan',this)">โรงพยาบาลบำรุงราษฎร์</div>
+    <div class="h-opt" onclick="pickHospital('h-input-loan','h-list-loan',this)">โรงพยาบาลกรุงเทพ</div>
+    <div class="h-opt" onclick="pickHospital('h-input-loan','h-list-loan',this)">โรงพยาบาลเซ็นทรัลเยนเนอรัล</div>
+    <div class="h-opt" onclick="pickHospital('h-input-loan','h-list-loan',this)">โรงพยาบาลนครธน</div>
+  </div>
+</div>
+```
+
+  </div>
+        <div class="form-group">
+          <label class="form-label">เครื่อง CPAP/BiPAP</label>
+          <div id="sales-device-rows">
+            <div style="display:flex;gap:8px;margin-bottom:8px">
+              <select class="form-input form-select" style="flex:2"><option>XT-AUTO</option><option>R-20i</option><option>APEX iX Auto</option></select>
+              <input class="form-input" type="number" value="1" style="flex:1">
+            </div>
+          </div>
+          <button onclick="addRow('sales-device-rows','เครื่อง')" style="background:#f0f4f8;color:var(--sky-muted);border:none;width:100%;padding:10px;border-radius:8px;font-family:var(--ion-font-family);font-size:12px;cursor:pointer;margin-bottom:8px">+ เพิ่มรุ่น</button>
+        </div>
+        <div class="form-group">
+          <label class="form-label">หน้ากาก / อุปกรณ์</label>
+          <div id="sales-acc-rows">
+            <div style="display:flex;gap:8px;margin-bottom:8px">
+              <select class="form-input form-select" style="flex:2"><option>WiZARD S</option><option>AirFit F20</option><option>Filter F20</option><option>Standard Hose</option><option>WiZARD Headgear</option></select>
+              <input class="form-input" type="number" value="1" style="flex:1">
+            </div>
+          </div>
+          <button onclick="addRow('sales-acc-rows','อุปกรณ์')" style="background:#f0f4f8;color:var(--sky-muted);border:none;width:100%;padding:10px;border-radius:8px;font-family:var(--ion-font-family);font-size:12px;cursor:pointer">+ เพิ่มอุปกรณ์</button>
+        </div>
+        <div class="form-group"><label class="form-label">หมายเหตุ</label><textarea class="form-input" rows="2" placeholder="หมายเหตุเพิ่มเติม..."></textarea></div>
+        <button class="btn-block btn-green" onclick="G('pg-dash');T('✅ ส่งคำขอ Sales Stock รอเจ้าของ Approve')">📤 ส่งคำขอ Sales Stock</button>
+      </div></div>
+    </div>
+
+```
+<!-- Demo Form -->
+<div id="form-demo" style="display:none">
+  <div class="card"><div class="card-body">
+    <div style="background:#eff6ff;border-radius:10px;padding:10px;font-size:12px;color:#1e40af;margin-bottom:12px">
+      🔵 เครื่อง Demo จะอยู่กับคุณตลอด · ลูกค้าทดลองแล้วต้องคืนคุณ · บริษัทอาจเรียกตรวจเมื่อไหรก็ได้
+    </div>
+    <div class="form-group"><label class="form-label">วันที่ต้องการรับเครื่อง *</label><input class="form-input" type="date" value="2026-03-25"></div>
+    <div class="form-group">
+      <label class="form-label">เครื่อง Demo</label>
+      <div id="demo-device-rows">
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <select class="form-input form-select" style="flex:2"><option>XT-AUTO</option><option>R-20i</option><option>APEX iX Auto</option></select>
+          <input class="form-input" type="number" value="1" style="flex:1">
+        </div>
+      </div>
+      <button onclick="addRow('demo-device-rows','เครื่อง demo')" style="background:#f0f4f8;color:var(--sky-muted);border:none;width:100%;padding:10px;border-radius:8px;font-family:var(--ion-font-family);font-size:12px;cursor:pointer;margin-bottom:8px">+ เพิ่มรุ่น</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">หน้ากาก / อุปกรณ์ประกอบ</label>
+      <div id="demo-acc-rows">
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <select class="form-input form-select" style="flex:2"><option>WiZARD S</option><option>AirFit F20</option><option>Filter F20</option><option>Standard Hose</option><option>WiZARD Headgear</option></select>
+          <input class="form-input" type="number" value="1" style="flex:1">
+        </div>
+      </div>
+      <button onclick="addRow('demo-acc-rows','อุปกรณ์')" style="background:#f0f4f8;color:var(--sky-muted);border:none;width:100%;padding:10px;border-radius:8px;font-family:var(--ion-font-family);font-size:12px;cursor:pointer">+ เพิ่มอุปกรณ์</button>
+    </div>
+    <div class="form-group"><label class="form-label">หมายเหตุ</label><textarea class="form-input" rows="2" placeholder="หมายเหตุเพิ่มเติม..."></textarea></div>
+    <button class="btn-block btn-blue" onclick="G('pg-dash');T('✅ ส่งคำขอ Demo รอเจ้าของ Approve')">📤 ส่งคำขอ Demo</button>
+  </div></div>
+</div>
+```
+
+  </div>
+  <div class="ion-tab-bar">
+    <button class="ion-tab-btn" onclick="G('pg-dash')"><span class="tab-icon">🏠</span><span class="tab-lbl">หลัก</span></button>
+    <button class="ion-tab-btn tab-active"><span class="tab-icon">📋</span><span class="tab-lbl">ขอเบิก</span></button>
+    <button class="ion-tab-btn" onclick="G('pg-loanform')"><span class="tab-icon">📦</span><span class="tab-lbl">LoanForm</span></button>
+    <button class="ion-tab-btn" onclick="G('pg-warranty')"><span class="tab-icon">🛡️</span><span class="tab-lbl">Warranty</span></button>
+    <button class="ion-tab-btn" onclick="G('pg-report')"><span class="tab-icon">📊</span><span class="tab-lbl">รายงาน</span></button>
+  </div>
+</div>
+
+<!-- PAGE: LOANFORM LIST -->
+
+<div class="ion-page" id="pg-loanform">
+  <div class="ion-header"><div class="ion-toolbar">
+    <button class="back-btn" onclick="G('pg-dash')">←</button>
+    <div><div class="toolbar-title">📦 LoanForm</div><div class="toolbar-sub">รายการยืมทั้งหมด</div></div>
+    <div class="avatar">แ</div>
+  </div></div>
+  <div class="ion-content">
+    <div class="segment-bar">
+      <button class="seg-btn active" onclick="loanTab(0,this)">Following</button>
+      <button class="seg-btn" onclick="loanTab(1,this)">เลยกำหนดคืน</button>
+      <button class="seg-btn" onclick="loanTab(2,this)">Returned</button>
+    </div>
+
+```
+<!-- TAB 0: Following -->
+<div id="lt-0">
+  <div class="list-item" onclick="O('m-loan-detail')">
+    <div class="item-icon" style="background:#dbeafe">📟</div>
+    <div class="item-body">
+      <div class="item-title">คุณสมชาย ใจดี</div>
+      <div class="item-sub">D-001 XT-AUTO · รพ.จุฬาฯ · ครบ 30 มี.ค.<br><span class="chip pool-demo">Demo</span> <span class="status-pill s-following" style="font-size:9px">Following</span></div>
+    </div>
+    <div class="item-end"><span class="chip chip-gray">PendingDecision</span></div>
+  </div>
+  <div class="list-item" onclick="O('m-loan-detail')">
+    <div class="item-icon" style="background:#dcfce7">📟</div>
+    <div class="item-body">
+      <div class="item-title">คุณนิภา วงศ์สุข</div>
+      <div class="item-sub">XT-AUTO SN-XXX · รพ.ศิริราช · ครบ 1 เม.ย.<br><span class="chip pool-sales">Sales</span> <span class="status-pill s-following" style="font-size:9px">Following</span></div>
+    </div>
+    <div class="item-end"><span class="chip chip-gray">PendingDecision</span></div>
+  </div>
+</div>
+
+<!-- TAB 1: เลยกำหนดคืน -->
+<div id="lt-1" style="display:none">
+  <div style="background:#fef2f2;border-radius:12px;padding:11px 14px;border:1px solid #fca5a5;font-size:12px;color:#991b1b;margin-bottom:12px">
+    ⏰ DateDue &lt; วันนี้ · ควรติดตามด่วน
+  </div>
+  <div class="list-item" onclick="O('m-loan-detail')">
+    <div class="item-icon" style="background:#fee2e2">⏰</div>
+    <div class="item-body">
+      <div class="item-title">คุณวิไล สุขใจ</div>
+      <div class="item-sub">D-007 APEX iX Auto · เลย 3 วัน<br><span class="chip pool-demo">Demo</span> <span class="chip chip-danger">เลยกำหนด</span></div>
+    </div>
+    <div class="item-end"><div style="font-size:11px;color:#dc2626;font-weight:700">20 มี.ค.</div></div>
+  </div>
+</div>
+
+<!-- TAB 2: Returned -->
+<div id="lt-2" style="display:none">
+  <div class="list-item" onclick="O('m-loan-detail')">
+    <div class="item-icon" style="background:#f1f5f9">📟</div>
+    <div class="item-body">
+      <div class="item-title">คุณประยุทธ์ สุดท้าย</div>
+      <div class="item-sub">D-003 R-20i · คืนแล้ว 10 มี.ค.<br><span class="chip pool-demo">Demo</span> <span class="status-pill s-returned" style="font-size:9px">Returned</span></div>
+    </div>
+    <div class="item-end"><span class="chip chip-success">Purchased</span></div>
+  </div>
+</div>
+
+<button class="btn-block btn-amber" style="margin-top:4px" onclick="O('m-new-loan')">+ สร้าง LoanForm ใหม่</button>
+```
+
+  </div>
+  <div class="ion-tab-bar">
+    <button class="ion-tab-btn" onclick="G('pg-dash')"><span class="tab-icon">🏠</span><span class="tab-lbl">หลัก</span></button>
+    <button class="ion-tab-btn" onclick="G('pg-request')"><span class="tab-icon">📋</span><span class="tab-lbl">ขอเบิก</span></button>
+    <button class="ion-tab-btn tab-active"><span class="tab-icon">📦</span><span class="tab-lbl">LoanForm</span></button>
+    <button class="ion-tab-btn" onclick="G('pg-warranty')"><span class="tab-icon">🛡️</span><span class="tab-lbl">Warranty</span></button>
+    <button class="ion-tab-btn" onclick="G('pg-report')"><span class="tab-icon">📊</span><span class="tab-lbl">รายงาน</span></button>
+  </div>
+</div>
+
+<!-- PAGE: DEMO DEVICE DETAIL (ประวัติเครื่อง Demo) -->
+
+<div class="ion-page" id="pg-demo-detail">
+  <div class="ion-header"><div class="ion-toolbar">
+    <button class="back-btn" onclick="G('pg-dash')">←</button>
+    <div><div class="toolbar-title">D-007 · APEX iX Auto</div><div class="toolbar-sub" style="font-family:monospace">SN: CADD3A00390</div></div>
+    <div class="avatar">แ</div>
+  </div></div>
+  <div class="ion-content">
+    <div class="card"><div class="card-body">
+      <div class="card-title">สถานะปัจจุบัน</div>
+      <div class="info-row"><span class="info-key">DemoNo</span><span class="info-val" style="font-family:monospace;font-weight:800">D-007</span></div>
+      <div class="info-row"><span class="info-key">Pool</span><span class="info-val"><span class="chip pool-demo">Demo</span></span></div>
+      <div class="info-row"><span class="info-key">ผู้รับผิดชอบ</span><span class="info-val">แอน สวยงาม</span></div>
+      <div class="info-row"><span class="info-key">ลูกค้าปัจจุบัน</span><span class="info-val" style="color:#dc2626">คุณวิไล · เลย 3 วัน</span></div>
+      <div class="info-row"><span class="info-key">Inspection ล่าสุด</span><span class="info-val">1 มี.ค. 2026 · ผ่าน</span></div>
+    </div></div>
+
+```
+<!-- ประวัติการใช้งาน (LoanForm history) -->
+<div class="section-title">ประวัติ LoanForm</div>
+<div style="background:#f8fafc;border-radius:10px;padding:12px;margin-bottom:8px">
+  <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+    <span style="font-size:12px;font-weight:700">คุณวิไล สุขใจ</span>
+    <span style="font-size:11px;color:#dc2626;font-weight:700">เลย 3 วัน</span>
+  </div>
+  <div style="font-size:10px;color:var(--sky-muted);font-family:monospace">10 มี.ค. → 20 มี.ค. 2026 · Following</div>
+</div>
+<div style="background:#f8fafc;border-radius:10px;padding:12px;margin-bottom:8px">
+  <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+    <span style="font-size:12px;font-weight:700">คุณสมชาย ใจดี</span>
+    <span style="font-size:11px;color:var(--sky-muted);font-weight:700">20 วัน</span>
+  </div>
+  <div style="font-size:10px;color:var(--sky-muted);font-family:monospace">15 ก.พ. → 5 มี.ค. 2026 · Returned · NotPurchased</div>
+</div>
+<div style="background:#f8fafc;border-radius:10px;padding:12px;margin-bottom:8px">
+  <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+    <span style="font-size:12px;font-weight:700">คุณประยุทธ์ มีสุข</span>
+    <span style="font-size:11px;color:var(--sky-muted);font-weight:700">14 วัน</span>
+  </div>
+  <div style="font-size:10px;color:var(--sky-muted);font-family:monospace">1 ก.พ. → 14 ก.พ. 2026 · Returned · NotPurchased</div>
+</div>
+
+<button class="btn-block btn-green" onclick="G('pg-dash');O('m-confirm-sale')">💰 ลูกค้าซื้อ → Confirm Sale</button>
+<button class="btn-block btn-danger" style="margin-top:8px" onclick="G('pg-dash');T('↩️ แจ้งคืน สต๊อกรับ')">↩️ ลูกค้าไม่ซื้อ คืนเครื่อง</button>
+```
+
+  </div>
+  <div class="ion-tab-bar">
+    <button class="ion-tab-btn" onclick="G('pg-dash')"><span class="tab-icon">🏠</span><span class="tab-lbl">หลัก</span></button>
+    <button class="ion-tab-btn" onclick="G('pg-request')"><span class="tab-icon">📋</span><span class="tab-lbl">ขอเบิก</span></button>
+    <button class="ion-tab-btn tab-active"><span class="tab-icon">📦</span><span class="tab-lbl">LoanForm</span></button>
+    <button class="ion-tab-btn" onclick="G('pg-warranty')"><span class="tab-icon">🛡️</span><span class="tab-lbl">Warranty</span></button>
+    <button class="ion-tab-btn" onclick="G('pg-report')"><span class="tab-icon">📊</span><span class="tab-lbl">รายงาน</span></button>
+  </div>
+</div>
+
+<!-- PAGE: WARRANTY -->
+
+<div class="ion-page" id="pg-warranty">
+  <div class="ion-header"><div class="ion-toolbar">
+    <button class="back-btn" onclick="G('pg-dash')">←</button>
+    <div><div class="toolbar-title">🛡️ Warranty</div><div class="toolbar-sub">ค้างกรอก 2 รายการ</div></div>
+    <div class="avatar">แ</div>
+  </div></div>
+  <div class="ion-content">
+    <div class="list-item" onclick="O('m-warranty-fill')">
+      <div class="item-icon" style="background:#fee2e2">🛡️</div>
+      <div class="item-body"><div class="item-title">XT-AUTO · SN-CADD3A00376</div><div class="item-sub">ขาย 3 วันที่แล้ว ยังไม่กรอก</div></div>
+      <div class="item-end"><span class="chip chip-danger">ด่วน!</span></div>
+    </div>
+    <div class="list-item" onclick="O('m-warranty-fill')">
+      <div class="item-icon" style="background:#fef3c7">🛡️</div>
+      <div class="item-body"><div class="item-title">R-20i · SN-CADI3C01200</div><div class="item-sub">ขาย 1 วันที่แล้ว</div></div>
+      <div class="item-end"><span class="chip chip-warning">รอกรอก</span></div>
+    </div>
+  </div>
+  <div class="ion-tab-bar">
+    <button class="ion-tab-btn" onclick="G('pg-dash')"><span class="tab-icon">🏠</span><span class="tab-lbl">หลัก</span></button>
+    <button class="ion-tab-btn" onclick="G('pg-request')"><span class="tab-icon">📋</span><span class="tab-lbl">ขอเบิก</span></button>
+    <button class="ion-tab-btn" onclick="G('pg-loanform')"><span class="tab-icon">📦</span><span class="tab-lbl">LoanForm</span></button>
+    <button class="ion-tab-btn tab-active"><span class="tab-icon">🛡️</span><span class="tab-lbl">Warranty</span></button>
+    <button class="ion-tab-btn" onclick="G('pg-report')"><span class="tab-icon">📊</span><span class="tab-lbl">รายงาน</span></button>
+  </div>
+</div>
+
+<!-- PAGE: REPORT -->
+
+<div class="ion-page" id="pg-report">
+  <div class="ion-header"><div class="ion-toolbar">
+    <button class="back-btn" onclick="G('pg-dash')">←</button>
+    <div><div class="toolbar-title">📊 รายงานของฉัน</div><div class="toolbar-sub">มีนาคม 2026</div></div>
+    <div class="avatar">แ</div>
+  </div></div>
+  <div class="ion-content">
+    <!-- salesSummary จาก device-loan component เดิม -->
+    <div class="stats-grid">
+      <div class="stat-card success"><div class="stat-title">ขายแล้ว</div><div class="stat-value">8</div><div class="stat-sub">Purchased</div><div class="stat-emoji">💰</div></div>
+      <div class="stat-card"><div class="stat-title">อัตราขาย</div><div class="stat-value">45%</div><div class="stat-sub">salesRate</div><div class="stat-emoji">📈</div></div>
+    </div>
+    <div class="card"><div class="card-body">
+      <div class="card-title">ยอดรวม</div>
+      <div class="info-row"><span class="info-key">totalLoans</span><span class="info-val">18 รายการ</span></div>
+      <div class="info-row"><span class="info-key">totalSales (Purchased)</span><span class="info-val" style="color:#16a34a">8 รายการ</span></div>
+      <div class="info-row"><span class="info-key">pendingDecisions</span><span class="info-val" style="color:#d97706">5 รายการ</span></div>
+      <div class="info-row"><span class="info-key">totalRevenue</span><span class="info-val" style="font-family:monospace">฿ 224,000</span></div>
+    </div></div>
+    <div class="card"><div class="card-body">
+      <div class="card-title">modelStats — รุ่นที่ขายได้</div>
+      <div class="progress-row"><div class="progress-head"><b>XT-AUTO</b><span style="font-family:monospace;color:var(--sky-muted)">5 (62.5%)</span></div><div class="progress-track"><div class="progress-fill" style="width:62%;background:var(--ion-color-primary)"></div></div></div>
+      <div class="progress-row"><div class="progress-head"><b>R-20i</b><span style="font-family:monospace;color:var(--sky-muted)">3 (37.5%)</span></div><div class="progress-track"><div class="progress-fill" style="width:37%;background:#16a34a"></div></div></div>
+    </div></div>
+  <div style="margin-top:4px"><button onclick="G('pg-history-sales')" style="width:100%;background:#f0f4f8;color:var(--sky-muted);border:none;padding:12px;border-radius:10px;font-family:var(--ion-font-family);font-size:12px;font-weight:700;cursor:pointer">📋 ดูประวัติ Activity Log</button></div>
+  </div>
+  <div class="ion-tab-bar">
+    <button class="ion-tab-btn" onclick="G('pg-dash')"><span class="tab-icon">🏠</span><span class="tab-lbl">หลัก</span></button>
+    <button class="ion-tab-btn" onclick="G('pg-request')"><span class="tab-icon">📋</span><span class="tab-lbl">ขอเบิก</span></button>
+    <button class="ion-tab-btn" onclick="G('pg-loanform')"><span class="tab-icon">📦</span><span class="tab-lbl">LoanForm</span></button>
+    <button class="ion-tab-btn" onclick="G('pg-warranty')"><span class="tab-icon">🛡️</span><span class="tab-lbl">Warranty</span></button>
+    <button class="ion-tab-btn tab-active"><span class="tab-icon">📊</span><span class="tab-lbl">รายงาน</span></button>
+  </div>
+</div>
+
+<!-- MODALS -->
+
+<!-- PAGE: MY MACHINES -->
+
+<div class="ion-page" id="pg-my-machines">
+  <div class="ion-header"><div class="ion-toolbar">
+    <button class="back-btn" onclick="G('pg-dash')">←</button>
+    <div><div class="toolbar-title">📟 My Machines</div><div class="toolbar-sub">8 เครื่องอยู่กับฉัน</div></div>
+    <div class="avatar">แ</div>
+  </div></div>
+  <div class="ion-content">
+    <div style="background:#eff6ff;border-radius:12px;padding:11px 14px;border:1px solid #bfdbfe;font-size:12px;color:#1e40af;margin-bottom:4px">
+      📟 เครื่องเหล่านี้อยู่กับคุณ — ไม่มี label Demo/Sales<br>สถานะขึ้นอยู่กับการกระทำ ไม่ใช่ประเภทเครื่อง
+    </div>
+    <div class="segment-bar">
+      <button class="seg-btn active" onclick="machTab(0,this)">ทั้งหมด (8)</button>
+      <button class="seg-btn" onclick="machTab(1,this)">WithSales (5)</button>
+      <button class="seg-btn" onclick="machTab(2,this)">WithPatient (3)</button>
+    </div>
+    <div id="mt-0">
+      <!-- Machine — WithSales, available to assign -->
+      <div class="list-item" onclick="O('m-machine-detail')">
+        <div class="item-icon" style="background:#dbeafe">📟</div>
+        <div class="item-body">
+          <div class="item-title">XT-AUTO</div>
+          <div class="item-sub" style="font-family:monospace;font-size:10px">SN: CADD3A00376 · รพ.จุฬาฯ</div>
+        </div>
+        <div class="item-end">
+          <span class="status-pill s-withsales">WithSales</span>
+          <div style="display:flex;gap:4px;margin-top:4px;justify-content:flex-end">
+            <button onclick="event.stopPropagation();O('m-trial-assign')" style="background:#dbeafe;color:#1e40af;border:none;padding:4px 8px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer">Trial</button>
+            <button onclick="event.stopPropagation();O('m-reserve')" style="background:#fef9c3;color:#713f12;border:none;padding:4px 8px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer">Reserve</button>
+          </div>
+        </div>
+      </div>
+      <!-- Machine — WithPatient -->
+      <div class="list-item" onclick="O('m-machine-detail')">
+        <div class="item-icon" style="background:#fce7f3">📟</div>
+        <div class="item-body">
+          <div class="item-title">APEX iX Auto</div>
+          <div class="item-sub">คุณวิไล สุขใจ · ครบ 20 มี.ค.<br><span style="font-family:monospace;font-size:10px">SN: CADD3A00390</span></div>
+        </div>
+        <div class="item-end">
+          <span class="status-pill s-withpatient">WithPatient</span>
+          <div style="margin-top:4px"><button onclick="event.stopPropagation();O('m-return-trial')" style="background:#fce7f3;color:#9d174d;border:none;padding:4px 8px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer">รับคืน</button></div>
+        </div>
+      </div>
+      <!-- Machine — Reserved -->
+      <div class="list-item" onclick="O('m-machine-detail')">
+        <div class="item-icon" style="background:#fef9c3">📟</div>
+        <div class="item-body">
+          <div class="item-title">R-20i</div>
+          <div class="item-sub">จองสำหรับ คุณนิภา<br><span style="font-family:monospace;font-size:10px">SN: CADI3C01202</span></div>
+        </div>
+        <div class="item-end">
+          <span class="status-pill s-reserved">Reserved</span>
+        </div>
+      </div>
+    </div>
+    <!-- Transfer button at bottom -->
+    <button class="btn-block" style="background:#f0f4f8;color:var(--sky-text);margin-top:4px" onclick="O('m-transfer')">🔄 โอนเครื่องให้เซลล์คนอื่น</button>
+  </div>
+  <div class="ion-tab-bar">
+    <button class="ion-tab-btn" onclick="G('pg-dash')"><span class="tab-icon">🏠</span><span class="tab-lbl">หลัก</span></button>
+    <button class="ion-tab-btn tab-active"><span class="tab-icon">📟</span><span class="tab-lbl">Machines</span></button>
+    <button class="ion-tab-btn" onclick="G('pg-cases')"><span class="tab-icon">📋</span><span class="tab-lbl">Cases</span></button>
+    <button class="ion-tab-btn" onclick="G('pg-warranty')"><span class="tab-icon">🛡️</span><span class="tab-lbl">Warranty</span></button>
+    <button class="ion-tab-btn" onclick="G('pg-report')"><span class="tab-icon">📊</span><span class="tab-lbl">รายงาน</span></button>
+  </div>
+</div>
+
+<!-- PAGE: CASES -->
+
+<div class="ion-page" id="pg-cases">
+  <div class="ion-header"><div class="ion-toolbar">
+    <button class="back-btn" onclick="G('pg-dash')">←</button>
+    <div><div class="toolbar-title">📋 Cases</div><div class="toolbar-sub">การเดินทางของลูกค้า</div></div>
+    <div class="avatar">แ</div>
+  </div></div>
+  <div class="ion-content">
+    <div style="background:#f0fdf4;border-radius:12px;padding:11px 14px;border:1px solid #86efac;font-size:12px;color:#14532d;margin-bottom:4px">
+      📋 Case = การเดินทางของลูกค้า · เครื่องแยกต่างหาก · Case มีได้โดยไม่ต้องถือเครื่อง
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      <button onclick="O('m-new-trial')" style="background:#dbeafe;border:1.5px solid #bfdbfe;border-radius:12px;padding:14px;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;font-family:var(--ion-font-family)">
+        <span style="font-size:24px">🔬</span>
+        <span style="font-size:12px;font-weight:800;color:#1e40af">New Demo Case</span>
+        <span style="font-size:10px;color:#1e40af;opacity:.7">ให้ยืมทดลอง</span>
+      </button>
+      <button onclick="O('m-new-direct-sale')" style="background:#dcfce7;border:1.5px solid #bbf7d0;border-radius:12px;padding:14px;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;font-family:var(--ion-font-family)">
+        <span style="font-size:24px">💰</span>
+        <span style="font-size:12px;font-weight:800;color:#14532d">Direct Sale</span>
+        <span style="font-size:10px;color:#14532d;opacity:.7">ขายโดยตรง</span>
+      </button>
+    </div>
+    <div class="segment-bar">
+      <button class="seg-btn active" onclick="caseTab(0,this)">Active (8)</button>
+      <button class="seg-btn" onclick="caseTab(1,this)">เลยกำหนด (2)</button>
+      <button class="seg-btn" onclick="caseTab(2,this)">ปิดแล้ว</button>
+    </div>
+    <div id="ct-0">
+      <div class="list-item" onclick="O('m-case-detail')">
+        <div class="item-icon" style="background:#dbeafe">📋</div>
+        <div class="item-body">
+          <div class="item-title">คุณสมชาย ใจดี</div>
+          <div class="item-sub">Trial · APEX iX Auto · รพ.จุฬาฯ<br>ครบ 30 มี.ค. 2026 <span class="chip chip-warning">Pending</span></div>
+        </div>
+        <div class="item-end"><span class="chip chip-primary">Trial</span></div>
+      </div>
+      <div class="list-item" onclick="O('m-case-detail')">
+        <div class="item-icon" style="background:#dcfce7">📋</div>
+        <div class="item-body">
+          <div class="item-title">คุณนิภา วงศ์สุข</div>
+          <div class="item-sub">Direct Sale · XT-AUTO · รพ.ศิริราช<br>Reserved · รอยืนยัน</div>
+        </div>
+        <div class="item-end"><span class="chip chip-success">Direct</span></div>
+      </div>
+    </div>
+    <div id="ct-1" style="display:none">
+      <div class="list-item" onclick="O('m-case-detail')">
+        <div class="item-icon" style="background:#fee2e2">⏰</div>
+        <div class="item-body">
+          <div class="item-title">คุณวิไล สุขใจ</div>
+          <div class="item-sub">Trial · APEX iX Auto · เลย 3 วัน<br><span class="chip chip-danger">เลยกำหนด</span></div>
+        </div>
+        <div class="item-end"><div style="font-size:11px;color:#dc2626;font-weight:700">20 มี.ค.</div></div>
+      </div>
+    </div>
+    <div id="ct-2" style="display:none">
+      <div class="list-item"><div class="item-icon" style="background:#f0f4f8">✅</div><div class="item-body"><div class="item-title">คุณประยุทธ์ มีสุข</div><div class="item-sub">Trial → Sold · XT-AUTO · 10 มี.ค.</div></div><div class="item-end"><span class="chip chip-success">Sold</span></div></div>
+    </div>
+  </div>
+  <div class="ion-tab-bar">
+    <button class="ion-tab-btn" onclick="G('pg-dash')"><span class="tab-icon">🏠</span><span class="tab-lbl">หลัก</span></button>
+    <button class="ion-tab-btn" onclick="G('pg-my-machines')"><span class="tab-icon">📟</span><span class="tab-lbl">Machines</span></button>
+    <button class="ion-tab-btn tab-active"><span class="tab-icon">📋</span><span class="tab-lbl">Cases</span></button>
+    <button class="ion-tab-btn" onclick="G('pg-warranty')"><span class="tab-icon">🛡️</span><span class="tab-lbl">Warranty</span></button>
+    <button class="ion-tab-btn" onclick="G('pg-report')"><span class="tab-icon">📊</span><span class="tab-lbl">รายงาน</span></button>
+  </div>
+</div>
+
+<!-- Inspect Alert -->
+
+<div class="modal-overlay" id="m-inspect-alert" onclick="C('m-inspect-alert')"><div class="modal-sheet" onclick="event.stopPropagation()">
+  <div class="modal-handle"></div>
+  <div style="background:#fef2f2;border-radius:12px;padding:14px;margin-bottom:14px;border:1px solid #fca5a5">
+    <div style="font-size:12px;font-weight:800;color:#991b1b;margin-bottom:4px">⚠️ บริษัทเรียกตรวจ DemoNo</div>
+    <div style="font-size:15px;font-weight:800">D-007 · APEX iX Auto</div>
+  </div>
+  <div class="info-row"><span class="info-key">เรียกโดย</span><span class="info-val">สต๊อก ส.</span></div>
+  <div class="info-row"><span class="info-key">วันที่เรียก</span><span class="info-val">23 มี.ค. 2026</span></div>
+  <div class="info-row"><span class="info-key">ต้องนำส่งภายใน</span><span class="info-val" style="color:#dc2626">25 มี.ค. 2026</span></div>
+  <div style="background:#fef9c3;border-radius:10px;padding:10px;font-size:12px;color:#78350f;margin:12px 0">
+    ⚠️ เครื่องอยู่กับคุณวิไล สุขใจ (เลยกำหนดแล้ว) ควรเรียกคืนจากลูกค้าก่อน
+  </div>
+  <div class="form-group"><label class="form-label">วันที่จะนำส่ง</label><input class="form-input" type="date" value="2026-03-25"></div>
+  <button class="btn-block btn-amber" onclick="C('m-inspect-alert');T('✅ ยืนยันแล้ว บริษัทรับทราบ')">✅ ยืนยันจะนำส่ง</button>
+  <button class="btn-block btn-danger" onclick="C('m-inspect-alert')">ปิด</button>
+</div></div>
+
+<!-- Confirm Sale -->
+
+<div class="modal-overlay" id="m-confirm-sale" onclick="C('m-confirm-sale')"><div class="modal-sheet" onclick="event.stopPropagation()">
+  <div class="modal-handle"></div>
+  <div class="modal-title">💰 Confirm Sale</div>
+  <div class="modal-sub">เปลี่ยน PurchaseStatus → Purchased · สร้าง Warranty อัตโนมัติ</div>
+  <div class="form-group"><label class="form-label">SN เครื่อง *</label>
+    <div style="display:flex;gap:8px"><input class="form-input" placeholder="พิมพ์หรือสแกน" style="flex:1"><button class="btn-block btn-amber" style="width:auto;padding:12px;margin-top:0" onclick="T('สแกน')">📷</button></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <div class="form-group"><label class="form-label">ชื่อลูกค้า *</label><input class="form-input" placeholder="ชื่อ-นามสกุล"></div>
+    <div class="form-group"><label class="form-label">เบอร์โทร *</label><input class="form-input" type="tel" placeholder="08X-XXX-XXXX"></div>
+  </div>
+  <div class="form-group">
+    <label class="form-label">โรงพยาบาล</label>
+    <div style="position:relative">
+      <input class="form-input" id="h-input-sale" placeholder="พิมพ์เพื่อค้นหา..." oninput="filterHospital(this,'h-list-sale')" onfocus="showHospital('h-list-sale')" onblur="setTimeout(()=>hideHospital('h-list-sale'),200)" autocomplete="off">
+      <div id="h-list-sale" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid #e2e8f0;border-top:none;border-radius:0 0 10px 10px;z-index:99;max-height:180px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,.1)">
+        <div class="h-opt" onclick="pickHospital('h-input-sale','h-list-sale',this)">โรงพยาบาลจุฬาลงกรณ์ สภากาชาดไทย</div>
+        <div class="h-opt" onclick="pickHospital('h-input-sale','h-list-sale',this)">โรงพยาบาลรามาธิบดี</div>
+        <div class="h-opt" onclick="pickHospital('h-input-sale','h-list-sale',this)">โรงพยาบาลศิริราช</div>
+        <div class="h-opt" onclick="pickHospital('h-input-sale','h-list-sale',this)">โรงพยาบาลพระมงกุฎเกล้า</div>
+        <div class="h-opt" onclick="pickHospital('h-input-sale','h-list-sale',this)">โรงพยาบาลภูมิพลอดุลยเดช</div>
+        <div class="h-opt" onclick="pickHospital('h-input-sale','h-list-sale',this)">โรงพยาบาลตำรวจ</div>
+        <div class="h-opt" onclick="pickHospital('h-input-sale','h-list-sale',this)">โรงพยาบาลเลิดสิน</div>
+        <div class="h-opt" onclick="pickHospital('h-input-sale','h-list-sale',this)">โรงพยาบาลบำรุงราษฎร์</div>
+        <div class="h-opt" onclick="pickHospital('h-input-sale','h-list-sale',this)">โรงพยาบาลกรุงเทพ</div>
+        <div class="h-opt" onclick="pickHospital('h-input-sale','h-list-sale',this)">โรงพยาบาลนครธน</div>
+      </div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <div class="form-group"><label class="form-label">วันที่ขาย *</label><input class="form-input" type="date" value="2026-03-24"></div>
+    <div class="form-group"><label class="form-label">ราคา (SalePrice) *</label><input class="form-input" type="number" placeholder="฿"></div>
+  </div>
+  <div style="background:#f0fdf4;border-radius:10px;padding:10px;font-size:12px;color:#14532d;margin-bottom:8px">
+    🛡️ สร้าง WarrantyRecord อัตโนมัติ: ตัวเครื่อง 2 ปี · Humidifier 1 ปี · Mask 3 เดือน
+  </div>
+  <button class="btn-block btn-green" onclick="C('m-confirm-sale');T('✅ Purchased! สร้าง WarrantyRecord แล้ว 3 รายการ')">💰 Confirm Sale → Purchased</button>
+  <button class="btn-block btn-danger" onclick="C('m-confirm-sale')">ยกเลิก</button>
+</div></div>
+
+<!-- New LoanForm -->
+
+<div class="modal-overlay" id="m-new-loan" onclick="C('m-new-loan')"><div class="modal-sheet" onclick="event.stopPropagation()">
+  <div class="modal-handle"></div>
+  <div class="modal-title">สร้าง LoanForm ใหม่</div>
+  <div class="modal-sub">บันทึกการให้ลูกค้าทดลองเครื่อง</div>
+
+  <!-- ขั้นตอน 0: ค้นหาเครื่องด้วย DemoNo ก่อน — SN auto-fill -->
+
+  <div class="step-header"><div class="step-num">0</div><div style="font-size:15px;font-weight:800">ค้นหาเครื่อง (DemoNo) *</div></div>
+  <div style="background:#eff6ff;border-radius:12px;padding:12px;border:1px solid #bfdbfe;font-size:12px;color:#1e40af;margin-bottom:12px">
+    🔵 ต้องระบุ DemoNo ก่อน · ระบบจะดึง SN และรุ่นเครื่องมาให้อัตโนมัติ
+  </div>
+  <div class="form-group">
+    <label class="form-label">DemoNo (deviceSearchNumber) *</label>
+    <div style="display:flex;gap:8px">
+      <input class="form-input" id="loan-demo-no" placeholder="เช่น D-001" style="flex:1;font-family:monospace;font-size:16px;font-weight:800">
+      <button onclick="searchDemoNo()" style="background:#d97706;color:#fff;border:none;padding:12px 16px;border-radius:10px;font-family:var(--ion-font-family);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">🔍 ค้นหา</button>
+    </div>
+  </div>
+  <!-- แสดงผลที่ดึงมาจาก Inventory — readonly -->
+  <div id="loan-device-info" style="display:none;background:#f0fdf4;border-radius:12px;padding:12px;border:1px solid #86efac;margin-bottom:14px">
+    <div style="font-size:11px;font-weight:800;color:#14532d;margin-bottom:8px">✅ พบเครื่องในระบบ — ข้อมูลดึงมาอัตโนมัติ</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div>
+        <div style="font-size:10px;color:#14532d;margin-bottom:2px">รุ่นเครื่อง (Model)</div>
+        <div id="loan-model-val" style="font-size:14px;font-weight:800;color:#0f172a">XT-AUTO</div>
+      </div>
+      <div>
+        <div style="font-size:10px;color:#14532d;margin-bottom:2px">Serial Number</div>
+        <div id="loan-sn-val" style="font-size:13px;font-weight:700;font-family:monospace;color:#0f172a">CADD3A00376</div>
+      </div>
+    </div>
+    <div style="font-size:10px;color:#16a34a;margin-top:8px">🔒 SN และรุ่นเครื่องแก้ไขไม่ได้ — ดึงจาก Inventory</div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="step-header"><div class="step-num">1</div><div style="font-size:15px;font-weight:800">ข้อมูลผู้ยืม</div></div>
+  <div class="form-group"><label class="form-label">ชื่อนามสกุล (PatientName) *</label><input class="form-input" placeholder="ชื่อ-นามสกุล"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <div class="form-group"><label class="form-label">อายุ</label><input class="form-input" type="number" placeholder="ปี"></div>
+    <div class="form-group"><label class="form-label">เบอร์โทร *</label><input class="form-input" type="tel"></div>
+  </div>
+  <div class="form-group"><label class="form-label">เลขบัตรประชาชน (CitizenID) *</label><input class="form-input" placeholder="x-xxxx-xxxxx-xx-x"></div>
+  <div class="form-group"><label class="form-label">ที่อยู่ (Address) *</label><textarea class="form-input" rows="2" placeholder="ที่อยู่"></textarea></div>
+
+  <div class="divider"></div>
+  <div class="step-header"><div class="step-num">2</div><div style="font-size:15px;font-weight:800">ข้อมูลการยืม</div></div>
+  <div class="form-group">
+    <label class="form-label">โรงพยาบาล *</label>
+    <div style="position:relative">
+      <input class="form-input" id="h-input-loan" placeholder="พิมพ์เพื่อค้นหา หรือเลือกจากรายการ..." oninput="filterHospital(this,'h-list-loan')" onfocus="showHospital('h-list-loan')" onblur="setTimeout(()=>hideHospital('h-list-loan'),200)" autocomplete="off">
+      <div id="h-list-loan" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid #e2e8f0;border-top:none;border-radius:0 0 10px 10px;z-index:99;max-height:200px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,.1)">
+        <div class="h-opt" onclick="pickHospital('h-input-loan','h-list-loan',this)">โรงพยาบาลจุฬาลงกรณ์ สภากาชาดไทย</div>
+        <div class="h-opt" onclick="pickHospital('h-input-loan','h-list-loan',this)">โรงพยาบาลรามาธิบดี</div>
+        <div class="h-opt" onclick="pickHospital('h-input-loan','h-list-loan',this)">โรงพยาบาลศิริราช</div>
+        <div class="h-opt" onclick="pickHospital('h-input-loan','h-list-loan',this)">โรงพยาบาลพระมงกุฎเกล้า</div>
+        <div class="h-opt" onclick="pickHospital('h-input-loan','h-list-loan',this)">โรงพยาบาลภูมิพลอดุลยเดช</div>
+        <div class="h-opt" onclick="pickHospital('h-input-loan','h-list-loan',this)">โรงพยาบาลตำรวจ</div>
+        <div class="h-opt" onclick="pickHospital('h-input-loan','h-list-loan',this)">โรงพยาบาลเลิดสิน</div>
+        <div class="h-opt" onclick="pickHospital('h-input-loan','h-list-loan',this)">โรงพยาบาลนพรัตนราชธานี</div>
+        <div class="h-opt" onclick="pickHospital('h-input-loan','h-list-loan',this)">โรงพยาบาลบำราศนราดูร</div>
+        <div class="h-opt" onclick="pickHospital('h-input-loan','h-list-loan',this)">โรงพยาบาลเวชศาสตร์เขตร้อน</div>
+        <div class="h-opt" onclick="pickHospital('h-input-loan','h-list-loan',this)">โรงพยาบาลสมิติเวช สุขุมวิท</div>
+        <div class="h-opt" onclick="pickHospital('h-input-loan','h-list-loan',this)">โรงพยาบาลบำรุงราษฎร์</div>
+        <div class="h-opt" onclick="pickHospital('h-input-loan','h-list-loan',this)">โรงพยาบาลกรุงเทพ</div>
+        <div class="h-opt" onclick="pickHospital('h-input-loan','h-list-loan',this)">โรงพยาบาลเซ็นทรัลเยนเนอรัล</div>
+        <div class="h-opt" onclick="pickHospital('h-input-loan','h-list-loan',this)">โรงพยาบาลนครธน</div>
+      </div>
+    </div>
+  </div>
+  <div class="form-group"><label class="form-label">HN *</label><input class="form-input" placeholder="HN"></div>
+  <div class="form-group"><label class="form-label">แพทย์ผู้สั่งจ่าย (Doctor) *</label><input class="form-input" placeholder="ชื่อแพทย์"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <div class="form-group"><label class="form-label">DateIssued</label><input class="form-input" type="date" value="2026-03-24"></div>
+    <div class="form-group"><label class="form-label">DateDue *</label><input class="form-input" type="date" value="2026-04-06"></div>
+  </div>
+
+  <!-- Humidifier SN (ถ้ามี) -->
+
+  <div class="form-group">
+    <label class="form-label">SN Humidifier (ProductSerialHumidifier)</label>
+    <input class="form-input" placeholder="กรอกถ้ามี Humidifier มาด้วย" style="font-family:monospace">
+  </div>
+
+  <div class="divider"></div>
+  <div class="step-header"><div class="step-num">3</div><div style="font-size:15px;font-weight:800">ตั้งค่าเครื่อง (DeviceSettings)</div></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <div class="form-group"><label class="form-label">Pressure *</label><input class="form-input" placeholder="cmH2O"></div>
+    <div class="form-group"><label class="form-label">RampPressure *</label><input class="form-input" placeholder="cmH2O"></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <div class="form-group"><label class="form-label">RampTime *</label><input class="form-input" placeholder="นาที"></div>
+    <div class="form-group"><label class="form-label">หน้ากาก (MaskType)</label>
+      <select class="form-input form-select"><option>-- เลือก --</option><option>WiZARD</option><option>AirFit F20</option></select>
+    </div>
+  </div>
+  <div class="form-group"><label class="form-label">ขนาดหน้ากาก (MaskSize)</label>
+    <select class="form-input form-select"><option>-- เลือกขนาด --</option><option>XS</option><option>S</option><option>SW</option><option>M</option><option>MW</option><option>L</option><option>LW</option><option>XL</option><option>PMI</option></select>
+  </div>
+  <div class="form-group"><label class="form-label">วันนัดพบแพทย์ (DoctorAppointmentDate)</label><input class="form-input" type="date"></div>
+  <div class="form-group"><label class="form-label">หมายเหตุ (Remarks)</label><textarea class="form-input" rows="2" placeholder="หมายเหตุ..."></textarea></div>
+
+<button class="btn-block btn-amber" onclick="C('m-new-loan');T('📦 สร้าง LoanForm แล้ว พิมพ์ใบยืม')">📦 บันทึก + พิมพ์ใบยืม</button>
+<button class="btn-block btn-danger" onclick="C('m-new-loan')">ยกเลิก</button>
+
+</div></div>
+
+<!-- Loan Detail -->
+
+<div class="modal-overlay" id="m-loan-detail" onclick="C('m-loan-detail')"><div class="modal-sheet" onclick="event.stopPropagation()">
+  <div class="modal-handle"></div>
+  <div class="modal-title">คุณสมชาย ใจดี</div>
+  <div class="modal-sub">D-001 XT-AUTO · LF-2026-021</div>
+  <div class="info-row"><span class="info-key">โรงพยาบาล</span><span class="info-val">รพ.จุฬาฯ</span></div>
+  <div class="info-row"><span class="info-key">DateIssued</span><span class="info-val">10 มี.ค. 2026</span></div>
+  <div class="info-row"><span class="info-key">DateDue</span><span class="info-val">30 มี.ค. 2026</span></div>
+  <div class="info-row"><span class="info-key">Pressure</span><span class="info-val">10 cmH2O</span></div>
+  <div class="info-row"><span class="info-key">LoanFormStatus</span><span class="info-val"><span class="status-pill s-following">Following</span></span></div>
+  <div class="info-row"><span class="info-key">PurchaseStatus</span><span class="info-val"><span class="chip chip-gray">PendingDecision</span></span></div>
+  <button class="btn-block btn-green" onclick="C('m-loan-detail');O('m-confirm-sale')">💰 ลูกค้าซื้อ → Confirm Sale</button>
+  <button class="btn-block btn-danger" style="margin-top:8px" onclick="C('m-loan-detail');T('↩️ บันทึก Returned แจ้งสต๊อก')">↩️ ไม่ซื้อ → Returned</button>
+  <button class="btn-block" style="background:#fef3c7;color:#78350f;margin-top:8px" onclick="C('m-loan-detail');O('m-device-change')">🔄 เปลี่ยนอุปกรณ์ระหว่างยืม</button>
+  <button class="btn-block" style="background:#dbeafe;color:#1e40af;margin-top:8px" onclick="C('m-loan-detail');O('m-convert-warranty')">🛡️ แปลงเป็น Warranty</button>
+  <button class="btn-block" style="background:#f0f4f8;color:var(--sky-muted)" onclick="C('m-loan-detail')">ปิด</button>
+</div></div>
+
+<!-- Warranty Fill -->
+
+<div class="modal-overlay" id="m-warranty-fill" onclick="C('m-warranty-fill')"><div class="modal-sheet" onclick="event.stopPropagation()">
+  <div class="modal-handle"></div>
+  <div class="modal-title">กรอก Warranty</div>
+  <div class="modal-sub">XT-AUTO · SN-CADD3A00376 · ขายแล้ว 3 วัน</div>
+  <div style="background:#f0fdf4;border-radius:10px;padding:10px;font-size:12px;color:#14532d;margin-bottom:12px">✅ SN ดึงมาให้แล้ว กรอกแค่ ชื่อ + เบอร์ + วันที่ขาย</div>
+  <div class="form-group"><label class="form-label">ชื่อลูกค้า (FullName) *</label><input class="form-input" placeholder="ชื่อ-นามสกุล"></div>
+  <div class="form-group"><label class="form-label">เบอร์โทร *</label><input class="form-input" type="tel"></div>
+  <div class="form-group">
+    <label class="form-label">โรงพยาบาล</label>
+    <div style="position:relative">
+      <input class="form-input" id="h-input-war" placeholder="พิมพ์เพื่อค้นหา..." oninput="filterHospital(this,'h-list-war')" onfocus="showHospital('h-list-war')" onblur="setTimeout(()=>hideHospital('h-list-war'),200)" autocomplete="off">
+      <div id="h-list-war" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid #e2e8f0;border-top:none;border-radius:0 0 10px 10px;z-index:99;max-height:180px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,.1)">
+        <div class="h-opt" onclick="pickHospital('h-input-war','h-list-war',this)">โรงพยาบาลจุฬาลงกรณ์ สภากาชาดไทย</div>
+        <div class="h-opt" onclick="pickHospital('h-input-war','h-list-war',this)">โรงพยาบาลรามาธิบดี</div>
+        <div class="h-opt" onclick="pickHospital('h-input-war','h-list-war',this)">โรงพยาบาลศิริราช</div>
+        <div class="h-opt" onclick="pickHospital('h-input-war','h-list-war',this)">โรงพยาบาลพระมงกุฎเกล้า</div>
+        <div class="h-opt" onclick="pickHospital('h-input-war','h-list-war',this)">โรงพยาบาลภูมิพลอดุลยเดช</div>
+        <div class="h-opt" onclick="pickHospital('h-input-war','h-list-war',this)">โรงพยาบาลตำรวจ</div>
+        <div class="h-opt" onclick="pickHospital('h-input-war','h-list-war',this)">โรงพยาบาลบำรุงราษฎร์</div>
+        <div class="h-opt" onclick="pickHospital('h-input-war','h-list-war',this)">โรงพยาบาลกรุงเทพ</div>
+        <div class="h-opt" onclick="pickHospital('h-input-war','h-list-war',this)">โรงพยาบาลนครธน</div>
+      </div>
+    </div>
+  </div>
+  <div class="form-group"><label class="form-label">วันที่ขายจริง *</label><input class="form-input" type="date" value="2026-03-21"></div>
+  <div style="background:#f0f4f8;border-radius:10px;padding:10px;font-size:12px;color:var(--sky-muted);margin-bottom:8px">
+    🛡️ สร้าง WarrantyRecord อัตโนมัติ: ตัวเครื่อง 2 ปี · Humidifier 1 ปี · Mask 3 เดือน
+  </div>
+  <button class="btn-block btn-green" onclick="C('m-warranty-fill');T('✅ WarrantyRecord สร้างแล้ว 3 รายการ')">🛡️ บันทึก Warranty</button>
+  <button class="btn-block btn-danger" onclick="C('m-warranty-fill')">ยกเลิก</button>
+</div></div>
+
+<!-- Sales Device -->
+
+<div class="modal-overlay" id="m-sales-device" onclick="C('m-sales-device')"><div class="modal-sheet" onclick="event.stopPropagation()">
+  <div class="modal-handle"></div>
+  <div class="modal-title">Sales Stock ที่ถืออยู่</div>
+  <div class="modal-sub">XT-AUTO ×3 · รพ.จุฬาฯ</div>
+  <div class="info-row"><span class="info-key">SN ที่ 1</span><span class="info-val" style="font-family:monospace">CADD3A00390</span></div>
+  <div class="info-row"><span class="info-key">SN ที่ 2</span><span class="info-val" style="font-family:monospace">CADD3A00391</span></div>
+  <div class="info-row"><span class="info-key">SN ที่ 3</span><span class="info-val" style="font-family:monospace">CADD3A00392</span></div>
+  <button class="btn-block btn-green" onclick="C('m-sales-device');O('m-confirm-sale')">💰 ขายแล้ว → Confirm Sale</button>
+  <button class="btn-block btn-danger" style="margin-top:8px" onclick="C('m-sales-device');T('↩️ คืนสต๊อก')">↩️ คืนเครื่อง</button>
+</div></div>
+
+<!-- Modal: Machine Detail -->
+
+<div class="modal-overlay" id="m-machine-detail" onclick="C('m-machine-detail')"><div class="modal-sheet" onclick="event.stopPropagation()">
+  <div class="modal-handle"></div>
+  <div class="modal-title">XT-AUTO</div>
+  <div class="modal-sub" style="font-family:monospace">SN: CADD3A00376</div>
+  <div class="info-row"><span class="info-key">สถานะเครื่อง</span><span class="info-val"><span class="status-pill s-withsales">WithSales</span></span></div>
+  <div class="info-row"><span class="info-key">รับมาวันที่</span><span class="info-val">5 ม.ค. 2025</span></div>
+  <div style="font-size:11px;font-weight:800;color:var(--sky-muted);text-transform:uppercase;letter-spacing:.7px;margin:12px 0 8px">Movement History</div>
+  <div style="padding-left:14px;border-left:2px solid #e2e8f0">
+    <div style="position:relative;padding-bottom:10px"><div style="position:absolute;left:-18px;top:3px;width:9px;height:9px;border-radius:50%;background:#16a34a;border:2px solid #fff;box-shadow:0 0 0 2px #dcfce7"></div><div style="font-size:11px;font-weight:700">Assigned to Sales</div><div style="font-size:10px;color:var(--sky-muted)">5 ม.ค. 2025 · InCentralStock → WithSales</div></div>
+    <div style="position:relative;padding-bottom:10px"><div style="position:absolute;left:-18px;top:3px;width:9px;height:9px;border-radius:50%;background:#9d174d;border:2px solid #fff;box-shadow:0 0 0 2px #fce7f3"></div><div style="font-size:11px;font-weight:700">Assigned to Patient</div><div style="font-size:10px;color:var(--sky-muted)">10 ม.ค. · คุณสมชาย · WithSales → WithPatient</div></div>
+    <div style="position:relative"><div style="position:absolute;left:-18px;top:3px;width:9px;height:9px;border-radius:50%;background:#1e40af;border:2px solid #fff;box-shadow:0 0 0 2px #dbeafe"></div><div style="font-size:11px;font-weight:700">Returned</div><div style="font-size:10px;color:var(--sky-muted)">25 ม.ค. · WithPatient → WithSales</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px">
+    <button onclick="C('m-machine-detail');O('m-trial-assign')" style="background:#dbeafe;color:#1e40af;border:none;padding:12px;border-radius:10px;font-family:var(--ion-font-family);font-size:12px;font-weight:700;cursor:pointer">🔬 สร้าง Trial Case</button>
+    <button onclick="C('m-machine-detail');O('m-reserve')" style="background:#fef9c3;color:#713f12;border:none;padding:12px;border-radius:10px;font-family:var(--ion-font-family);font-size:12px;font-weight:700;cursor:pointer">🔒 Reserve</button>
+    <button onclick="C('m-machine-detail');O('m-transfer')" style="background:#f0f4f8;color:var(--sky-muted);border:none;padding:12px;border-radius:10px;font-family:var(--ion-font-family);font-size:12px;font-weight:700;cursor:pointer">🔄 Transfer</button>
+    <button onclick="C('m-machine-detail')" style="background:#f0f4f8;color:var(--sky-muted);border:none;padding:12px;border-radius:10px;font-family:var(--ion-font-family);font-size:12px;font-weight:700;cursor:pointer">ปิด</button>
+  </div>
+</div></div>
+
+<!-- Modal: Transfer Machine -->
+
+<div class="modal-overlay" id="m-transfer" onclick="C('m-transfer')"><div class="modal-sheet" onclick="event.stopPropagation()">
+  <div class="modal-handle"></div>
+  <div class="modal-title">🔄 Transfer Machine</div>
+  <div class="modal-sub">XT-AUTO · SN: CADD3A00376</div>
+  <div style="background:#fef9c3;border-radius:10px;padding:10px;font-size:12px;color:#78350f;margin-bottom:14px">
+    ⚠️ Transfer ได้เฉพาะเครื่อง WithSales เท่านั้น<br>ไม่สามารถ transfer เครื่องที่ WithPatient, Reserved, หรือ Sold
+  </div>
+  <div class="info-row"><span class="info-key">สถานะปัจจุบัน</span><span class="info-val"><span class="status-pill s-withsales">WithSales</span></span></div>
+  <div class="form-group" style="margin-top:12px"><label class="form-label">โอนให้เซลล์ *</label>
+    <select class="form-input" style="appearance:none">
+      <option>-- เลือกเซลล์ --</option>
+      <option>บิ๊ก วงษ์สวรรค์</option>
+      <option>ปู น่ารัก</option>
+      <option>ต้น สะอาด</option>
+    </select>
+  </div>
+  <div class="form-group"><label class="form-label">เหตุผล</label><textarea class="form-input" rows="2" placeholder="เหตุผลที่โอน..."></textarea></div>
+  <button class="btn-block btn-amber" onclick="C('m-transfer');T('✅ Transfer แล้ว บันทึก Movement Log')">✅ ยืนยัน Transfer</button>
+  <button class="btn-block btn-danger" onclick="C('m-transfer')">ยกเลิก</button>
+</div></div>
+
+<!-- Modal: Reserve Machine -->
+
+<div class="modal-overlay" id="m-reserve" onclick="C('m-reserve')"><div class="modal-sheet" onclick="event.stopPropagation()">
+  <div class="modal-handle"></div>
+  <div class="modal-title">🔒 Reserve Machine</div>
+  <div class="modal-sub">XT-AUTO · SN: CADD3A00376</div>
+  <div style="background:#fef9c3;border-radius:10px;padding:10px;font-size:12px;color:#78350f;margin-bottom:14px">
+    🔒 Reserve แล้ว → status: <b>ReservedForSale</b><br>คนอื่นจะเลือกเครื่องนี้ไม่ได้ จนกว่าจะ Release
+  </div>
+  <div class="form-group"><label class="form-label">จองสำหรับลูกค้า *</label><input class="form-input" placeholder="ชื่อลูกค้า"></div>
+  <div class="form-group"><label class="form-label">หมายเหตุ</label><input class="form-input" placeholder="เหตุผลที่จอง"></div>
+  <button class="btn-block btn-amber" onclick="C('m-reserve');T('🔒 Reserved แล้ว ไม่มีใครเลือกได้')">🔒 Reserve เครื่องนี้</button>
+  <button class="btn-block btn-danger" onclick="C('m-reserve')">ยกเลิก</button>
+</div></div>
+
+<!-- Modal: New Demo Case — เหมือน LoanForm จริง -->
+
+<div class="modal-overlay" id="m-new-trial" onclick="C('m-new-trial')"><div class="modal-sheet" onclick="event.stopPropagation()">
+  <div class="modal-handle"></div>
+  <div class="modal-title">🔬 New Demo Case</div>
+  <div class="modal-sub">บันทึกการให้ลูกค้าทดลองเครื่อง</div>
+  <div style="background:#eff6ff;border-radius:10px;padding:10px;font-size:12px;color:#1e40af;margin-bottom:14px">
+    🔵 เลือกเครื่องจาก My Machines (WithSales) → Machine: <b>WithPatient</b><br>เมื่อรับคืน → Machine: WithSales · Case ยังเปิดอยู่จนกว่าลูกค้าจะตัดสินใจ
+  </div>
+
+  <!-- STEP 0 — ค้นหาเครื่อง (deviceSearchNumber) -->
+
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+    <div style="width:24px;height:24px;border-radius:50%;background:var(--sky-amber);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">0</div>
+    <div style="font-size:14px;font-weight:800">ค้นหาเครื่อง</div>
+  </div>
+  <div class="form-group">
+    <label class="form-label">หมายเลขเครื่อง (deviceSearchNumber) *</label>
+    <div style="display:flex;gap:8px">
+      <input class="form-input" id="demo-search-no" placeholder="เช่น A218 หรือ SN โดยตรง" style="flex:1;font-family:monospace">
+      <button onclick="searchDemoCase()" style="background:var(--sky-amber);color:#fff;border:none;padding:12px 16px;border-radius:10px;font-family:var(--ion-font-family);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">🔍 ค้นหา</button>
+    </div>
+    <div style="font-size:10px;color:var(--sky-muted);margin-top:4px">เฉพาะเครื่อง WithSales เท่านั้น</div>
+  </div>
+  <!-- ผลค้นหา — auto-fill readonly -->
+  <div id="demo-device-found" style="display:none;background:#f0fdf4;border-radius:10px;padding:12px;border:1px solid #86efac;margin-bottom:14px">
+    <div style="font-size:11px;font-weight:800;color:#14532d;margin-bottom:8px">✅ พบเครื่อง — ดึงข้อมูลมาให้อัตโนมัติ</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div>
+        <div style="font-size:10px;color:#14532d;margin-bottom:2px">รุ่น (Model)</div>
+        <div id="demo-model-val" style="font-size:13px;font-weight:800">XT-AUTO</div>
+      </div>
+      <div>
+        <div style="font-size:10px;color:#14532d;margin-bottom:2px">SN</div>
+        <div id="demo-sn-val" style="font-size:12px;font-weight:700;font-family:monospace">CADD3A00376</div>
+      </div>
+    </div>
+    <div style="font-size:10px;color:#16a34a;margin-top:6px">🔒 แก้ไขไม่ได้ — ดึงจาก Inventory</div>
+  </div>
+
+  <!-- SN Humidifier + QR (ถ้าเป็น iX) -->
+
+  <div id="demo-humidifier-section" style="display:none">
+    <div class="form-group"><label class="form-label">SN Humidifier (ProductSerialHumidifier)</label><input class="form-input" placeholder="กรอกถ้ามี Humidifier" style="font-family:monospace"></div>
+    <div class="form-group"><label class="form-label">QR Code เครื่อง (qrCode — เฉพาะ iX) *</label><input class="form-input" placeholder="สแกนหรือพิมพ์ QR Code" style="font-family:monospace"></div>
+    <div class="form-group"><label class="form-label">QR Code Humidifier (เฉพาะ iX)</label><input class="form-input" placeholder="QR Code เครื่องทำความชื้น" style="font-family:monospace"></div>
+  </div>
+
+  <div style="height:1px;background:#f0f4f8;margin:14px 0"></div>
+
+  <!-- STEP 1 — ข้อมูลผู้ป่วย -->
+
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+    <div style="width:24px;height:24px;border-radius:50%;background:var(--sky-amber);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">1</div>
+    <div style="font-size:14px;font-weight:800">ข้อมูลผู้ป่วย</div>
+  </div>
+  <div class="form-group"><label class="form-label">ชื่อนามสกุลผู้ป่วย (PatientName) *</label><input class="form-input" placeholder="ชื่อ-นามสกุล"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <div class="form-group"><label class="form-label">อายุ</label><input class="form-input" type="number" placeholder="ปี"></div>
+    <div class="form-group"><label class="form-label">เบอร์โทร *</label><input class="form-input" type="tel" placeholder="08X-XXX-XXXX"></div>
+  </div>
+  <div class="form-group"><label class="form-label">เลขบัตรประชาชน (CitizenID) *</label><input class="form-input" placeholder="x-xxxx-xxxxx-xx-x"></div>
+  <div class="form-group"><label class="form-label">ที่อยู่ (Address) *</label><textarea class="form-input" rows="2" placeholder="ที่อยู่"></textarea></div>
+
+  <div style="height:1px;background:#f0f4f8;margin:14px 0"></div>
+
+  <!-- STEP 2 — ข้อมูลการยืม -->
+
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+    <div style="width:24px;height:24px;border-radius:50%;background:var(--sky-amber);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">2</div>
+    <div style="font-size:14px;font-weight:800">ข้อมูลการยืม</div>
+  </div>
+  <div class="form-group">
+    <label class="form-label">โรงพยาบาล (Hospital) *</label>
+    <div style="position:relative">
+      <input class="form-input" id="h-trial" placeholder="พิมพ์เพื่อค้นหา..." oninput="filterHospital(this,'hl-trial')" onfocus="showHospital('hl-trial')" onblur="setTimeout(()=>hideHospital('hl-trial'),200)" autocomplete="off">
+      <div id="hl-trial" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid #e2e8f0;border-top:none;border-radius:0 0 10px 10px;z-index:99;max-height:200px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,.1)">
+        <div class="h-opt" onclick="pickHospital('h-trial','hl-trial',this)">โรงพยาบาลจุฬาลงกรณ์ สภากาชาดไทย</div>
+        <div class="h-opt" onclick="pickHospital('h-trial','hl-trial',this)">โรงพยาบาลรามาธิบดี</div>
+        <div class="h-opt" onclick="pickHospital('h-trial','hl-trial',this)">โรงพยาบาลศิริราช</div>
+        <div class="h-opt" onclick="pickHospital('h-trial','hl-trial',this)">โรงพยาบาลพระมงกุฎเกล้า</div>
+        <div class="h-opt" onclick="pickHospital('h-trial','hl-trial',this)">โรงพยาบาลภูมิพลอดุลยเดช</div>
+        <div class="h-opt" onclick="pickHospital('h-trial','hl-trial',this)">โรงพยาบาลตำรวจ</div>
+        <div class="h-opt" onclick="pickHospital('h-trial','hl-trial',this)">โรงพยาบาลเลิดสิน</div>
+        <div class="h-opt" onclick="pickHospital('h-trial','hl-trial',this)">โรงพยาบาลบำรุงราษฎร์</div>
+        <div class="h-opt" onclick="pickHospital('h-trial','hl-trial',this)">โรงพยาบาลกรุงเทพ</div>
+        <div class="h-opt" onclick="pickHospital('h-trial','hl-trial',this)">โรงพยาบาลนครธน</div>
+      </div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <div class="form-group"><label class="form-label">HN *</label><input class="form-input" placeholder="รหัส HN"></div>
+    <div class="form-group"><label class="form-label">แพทย์ผู้สั่งจ่าย (Doctor) *</label><input class="form-input" placeholder="ชื่อแพทย์"></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <div class="form-group"><label class="form-label">วันที่ออกเครื่อง (DateIssued)</label><input class="form-input" type="date" value="2026-03-24"></div>
+    <div class="form-group"><label class="form-label">วันที่ครบกำหนดคืน (DateDue) *</label><input class="form-input" type="date" value="2026-04-06"></div>
+  </div>
+  <div class="form-group"><label class="form-label">วันนัดพบแพทย์ (DoctorAppointmentDate)</label><input class="form-input" type="date"></div>
+  <div class="form-group"><label class="form-label">หมายเหตุ (Remarks)</label><textarea class="form-input" rows="2" placeholder="หมายเหตุเพิ่มเติม..."></textarea></div>
+
+  <div style="height:1px;background:#f0f4f8;margin:14px 0"></div>
+
+  <!-- STEP 3 — ตั้งค่าเครื่อง (DeviceSettings) -->
+
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+    <div style="width:24px;height:24px;border-radius:50%;background:var(--sky-amber);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">3</div>
+    <div style="font-size:14px;font-weight:800">ตั้งค่าเครื่อง (DeviceSettings)</div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <div class="form-group"><label class="form-label">แรงดันขณะใช้งาน (Pressure) *</label><input class="form-input" placeholder="cmH2O"></div>
+    <div class="form-group"><label class="form-label">Ramp Pressure *</label><input class="form-input" placeholder="cmH2O"></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <div class="form-group"><label class="form-label">Ramp Time *</label><input class="form-input" placeholder="นาที"></div>
+    <div class="form-group"><label class="form-label">หน้ากาก (MaskType)</label>
+      <select class="form-input" style="appearance:none"><option>-- เลือก --</option><option>WiZARD</option><option>AirFit F20</option><option>Mirage Quattro</option><option>Mirage FX</option></select>
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="form-label">ขนาดหน้ากาก (MaskSize)</label>
+    <select class="form-input" style="appearance:none"><option>-- เลือกขนาด --</option><option>XS</option><option>S</option><option>SW</option><option>M</option><option>MW</option><option>L</option><option>LW</option><option>XL</option><option>PMI</option></select>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+    <button class="btn-block btn-blue" style="margin-top:0" onclick="submitDemoCase()">📦 บันทึก</button>
+    <button class="btn-block" style="margin-top:0;background:#0a1628;color:#fff" onclick="submitAndPrint()">🖨️ บันทึก + ปริ้น</button>
+  </div>
+  <button class="btn-block btn-danger" onclick="C('m-new-trial')">ยกเลิก</button>
+</div></div>
+
+<!-- Modal: Direct Sale Case -->
+
+<div class="modal-overlay" id="m-new-direct-sale" onclick="C('m-new-direct-sale')"><div class="modal-sheet" onclick="event.stopPropagation()">
+  <div class="modal-handle"></div>
+  <div class="modal-title">💰 Direct Sale Case</div>
+  <div class="modal-sub">ขายโดยตรง ไม่ต้องทดลอง</div>
+  <div style="background:#f0fdf4;border-radius:10px;padding:10px;font-size:12px;color:#14532d;margin-bottom:14px">
+    💰 Direct Sale: เลือกเครื่องจาก Central Stock → Reserve → Sold → Warranty
+  </div>
+  <div class="form-group"><label class="form-label">เลือกเครื่องจาก Central Stock *</label>
+    <select class="form-input" style="appearance:none">
+      <option>-- เลือกเครื่อง InCentralStock --</option>
+      <option>XT-AUTO · SN: CADD3A00500 · InCentralStock</option>
+      <option>R-20i · SN: CADI3C01300 · InCentralStock</option>
+    </select>
+    <div style="font-size:10px;color:var(--sky-muted);margin-top:4px">เฉพาะเครื่อง InCentralStock เท่านั้น</div>
+  </div>
+  <div class="form-group"><label class="form-label">ชื่อลูกค้า *</label><input class="form-input" placeholder="ชื่อ-นามสกุล"></div>
+  <div class="form-group"><label class="form-label">โรงพยาบาล *</label>
+    <div style="position:relative"><input class="form-input" id="h-direct" placeholder="พิมพ์เพื่อค้นหา..." oninput="filterHospital(this,'hl-direct')" onfocus="showHospital('hl-direct')" onblur="setTimeout(()=>hideHospital('hl-direct'),200)" autocomplete="off">
+    <div id="hl-direct" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid #e2e8f0;border-top:none;border-radius:0 0 10px 10px;z-index:99;max-height:160px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,.1)">
+      <div class="h-opt" onclick="pickHospital('h-direct','hl-direct',this)">โรงพยาบาลจุฬาลงกรณ์ สภากาชาดไทย</div>
+      <div class="h-opt" onclick="pickHospital('h-direct','hl-direct',this)">โรงพยาบาลรามาธิบดี</div>
+      <div class="h-opt" onclick="pickHospital('h-direct','hl-direct',this)">โรงพยาบาลศิริราช</div>
+    </div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <div class="form-group"><label class="form-label">ราคาขาย *</label><input class="form-input" type="number" placeholder="฿"></div>
+    <div class="form-group"><label class="form-label">วันที่ขาย *</label><input class="form-input" type="date" value="2026-03-24"></div>
+  </div>
+  <button class="btn-block btn-green" onclick="C('m-new-direct-sale');T('✅ Direct Sale · Reserve → Sold · สร้าง Warranty')">💰 Reserve → Sold → สร้าง Warranty</button>
+  <button class="btn-block btn-danger" onclick="C('m-new-direct-sale')">ยกเลิก</button>
+</div></div>
+
+<!-- Modal: Return from Trial -->
+
+<div class="modal-overlay" id="m-return-trial" onclick="C('m-return-trial')"><div class="modal-sheet" onclick="event.stopPropagation()">
+  <div class="modal-handle"></div>
+  <div class="modal-title">↩️ รับเครื่องคืนจากคนไข้</div>
+  <div class="modal-sub">APEX iX Auto · SN: CADD3A00390 · คุณวิไล</div>
+  <div style="background:#fef9c3;border-radius:10px;padding:10px;font-size:12px;color:#78350f;margin-bottom:14px">
+    ⚠️ เครื่องกลับมา → Machine: WithPatient → <b>WithSales</b><br>Case ยังเปิดอยู่ รอลูกค้าตัดสินใจ
+  </div>
+  <div class="info-row"><span class="info-key">Machine หลังรับคืน</span><span class="info-val"><span class="status-pill s-withsales">WithSales</span></span></div>
+  <div class="info-row"><span class="info-key">Case status</span><span class="info-val">ยังเปิดอยู่ (PendingDecision)</span></div>
+  <div style="background:#f0fdf4;border-radius:10px;padding:10px;font-size:12px;color:#14532d;margin:12px 0">
+    ✅ ถ้าลูกค้าซื้อ → ต้องส่งเครื่องนี้คืนสต๊อกก่อน แล้วเลือกเครื่องใหม่จาก Central Stock
+  </div>
+  <div class="form-group"><label class="form-label">สภาพเครื่องเบื้องต้น</label>
+    <select class="form-input" style="appearance:none"><option>ปกติ</option><option>มีรอยขีดข่วน</option><option>ต้องตรวจเพิ่มเติม</option></select>
+  </div>
+  <button class="btn-block btn-amber" onclick="C('m-return-trial');T('✅ รับคืน Machine → WithSales')">✅ ยืนยันรับคืน</button>
+  <button class="btn-block btn-danger" onclick="C('m-return-trial')">ยกเลิก</button>
+</div></div>
+
+<!-- Modal: Case Detail -->
+
+<div class="modal-overlay" id="m-case-detail" onclick="C('m-case-detail')"><div class="modal-sheet" onclick="event.stopPropagation()">
+  <div class="modal-handle"></div>
+  <div class="modal-title">คุณสมชาย ใจดี</div>
+  <div class="modal-sub">Trial Case · LF-2026-021</div>
+  <div class="info-row"><span class="info-key">ประเภท</span><span class="info-val"><span class="chip chip-primary">Trial</span></span></div>
+  <div class="info-row"><span class="info-key">เครื่องที่ใช้</span><span class="info-val">APEX iX Auto · <span class="status-pill s-withpatient" style="font-size:9px">WithPatient</span></span></div>
+  <div class="info-row"><span class="info-key">โรงพยาบาล</span><span class="info-val">รพ.จุฬาฯ</span></div>
+  <div class="info-row"><span class="info-key">DateDue</span><span class="info-val">30 มี.ค. 2026</span></div>
+  <div class="info-row"><span class="info-key">Case Status</span><span class="info-val"><span class="chip chip-gray">PendingDecision</span></span></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">
+    <button onclick="C('m-case-detail');O('m-return-trial')" style="background:#fef9c3;color:#713f12;border:none;padding:12px;border-radius:10px;font-family:var(--ion-font-family);font-size:12px;font-weight:700;cursor:pointer">↩️ รับเครื่องคืน</button>
+    <button onclick="C('m-case-detail');O('m-purchase-after-trial')" style="background:#dcfce7;color:#14532d;border:none;padding:12px;border-radius:10px;font-family:var(--ion-font-family);font-size:12px;font-weight:700;cursor:pointer">💰 ลูกค้าซื้อ</button>
+    <button onclick="C('m-case-detail');O('m-device-change')" style="background:#f0f4f8;color:var(--sky-muted);border:none;padding:12px;border-radius:10px;font-family:var(--ion-font-family);font-size:12px;font-weight:700;cursor:pointer">🔄 เปลี่ยนอุปกรณ์</button>
+    <button onclick="C('m-case-detail')" style="background:#fee2e2;color:#dc2626;border:none;padding:12px;border-radius:10px;font-family:var(--ion-font-family);font-size:12px;font-weight:700;cursor:pointer">❌ ปิด Case</button>
+  </div>
+</div></div>
+
+<!-- Modal: Purchase after Trial — CRITICAL: must return demo first, pick new machine -->
+
+<div class="modal-overlay" id="m-purchase-after-trial" onclick="C('m-purchase-after-trial')"><div class="modal-sheet" onclick="event.stopPropagation()">
+  <div class="modal-handle"></div>
+  <div class="modal-title">💰 ลูกค้าซื้อหลังทดลอง</div>
+  <div class="modal-sub">คุณสมชาย ใจดี · Trial Case</div>
+  <div style="background:#fef2f2;border-radius:10px;padding:11px;border:1px solid #fca5a5;font-size:12px;color:#991b1b;margin-bottom:14px">
+    ⚠️ <b>IMPORTANT</b>: ต้องคืนเครื่อง Trial ก่อน แล้วเลือกเครื่องใหม่จาก Central Stock<br>Warranty ใช้ SN ของเครื่องใหม่เท่านั้น ไม่ใช่เครื่อง trial
+  </div>
+  <!-- Step 1: Confirm trial machine returned -->
+  <div style="background:#f8fafc;border-radius:10px;padding:11px;margin-bottom:10px">
+    <div style="font-size:11px;font-weight:800;color:var(--sky-muted);margin-bottom:6px">STEP 1 — ยืนยันคืนเครื่อง Trial</div>
+    <div class="info-row" style="padding:4px 0"><span class="info-key">เครื่อง Trial</span><span class="info-val">APEX iX Auto · SN: CADD3A00390</span></div>
+    <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
+      <input type="checkbox" id="chk-returned" onchange="checkTrialReturn(this)" style="width:18px;height:18px;cursor:pointer">
+      <label for="chk-returned" style="font-size:12px;font-weight:700;cursor:pointer">ยืนยันว่ารับเครื่อง Trial คืนแล้ว → WithSales</label>
+    </div>
+  </div>
+  <!-- Step 2: Select new machine from central stock -->
+  <div style="background:#f8fafc;border-radius:10px;padding:11px;margin-bottom:10px">
+    <div style="font-size:11px;font-weight:800;color:var(--sky-muted);margin-bottom:6px">STEP 2 — เลือกเครื่องใหม่จาก Central Stock</div>
+    <select class="form-input" id="sel-new-machine" style="appearance:none" disabled>
+      <option>-- ยืนยัน Step 1 ก่อน --</option>
+      <option>XT-AUTO · SN: CADD3A00500 · InCentralStock</option>
+      <option>R-20i · SN: CADI3C01300 · InCentralStock</option>
+    </select>
+    <div style="font-size:10px;color:var(--sky-muted);margin-top:4px">Warranty จะใช้ SN ของเครื่องนี้</div>
+  </div>
+  <!-- Step 3: Price -->
+  <div style="background:#f8fafc;border-radius:10px;padding:11px;margin-bottom:10px">
+    <div style="font-size:11px;font-weight:800;color:var(--sky-muted);margin-bottom:6px">STEP 3 — ราคาขาย</div>
+    <input class="form-input" type="number" placeholder="฿ ราคาขาย" disabled id="inp-price">
+  </div>
+  <div style="background:#f0fdf4;border-radius:10px;padding:10px;font-size:12px;color:#14532d;margin-bottom:8px">
+    🛡️ หลังยืนยัน: เครื่องใหม่ → Sold · สร้าง WarrantyRecord 3 รายการอัตโนมัติ
+  </div>
+  <button class="btn-block btn-green" id="btn-confirm-purchase" disabled onclick="C('m-purchase-after-trial');T('✅ Sold · Warranty สร้างแล้ว 3 รายการ')">💰 ยืนยันการซื้อ → สร้าง Warranty</button>
+  <button class="btn-block btn-danger" onclick="C('m-purchase-after-trial')">ยกเลิก</button>
+</div></div>
+
+<!-- Modal: ใบยืมเครื่อง (LoanForm PDF preview) -->
+
+<div class="modal-overlay" id="m-print-loan" onclick="C('m-print-loan')"><div class="modal-sheet" onclick="event.stopPropagation()">
+  <div class="modal-handle"></div>
+  <div class="modal-title">🖨️ ใบยืมเครื่อง</div>
+  <div class="modal-sub">ตัวอย่างก่อนพิมพ์ · QuestPDF</div>
+
+  <!-- ตัวอย่างใบยืม -->
+
+  <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.9;margin-bottom:14px">
+    <!-- Header -->
+    <div style="text-align:center;margin-bottom:10px">
+      <div style="font-size:13px;font-weight:800;font-family:'Noto Sans Thai',sans-serif">SKYLINE MEDICAL</div>
+      <div style="font-size:11px;color:#64748b;font-family:'Noto Sans Thai',sans-serif">ใบยืมเครื่อง CPAP / BiPAP</div>
+      <div style="font-size:10px;color:#94a3b8">skylinemedical.co.th</div>
+    </div>
+    <div style="height:1px;background:#e2e8f0;margin:8px 0"></div>
+    <!-- เลขที่ -->
+    <div style="display:flex;justify-content:space-between"><span style="color:#64748b">เลขที่ใบยืม:</span><span style="font-weight:700">LF-2026-089</span></div>
+    <div style="display:flex;justify-content:space-between"><span style="color:#64748b">วันที่ออก:</span><span>24 มี.ค. 2026</span></div>
+    <div style="height:1px;background:#e2e8f0;margin:6px 0"></div>
+    <!-- ข้อมูลผู้ยืม -->
+    <div style="font-size:10px;font-weight:800;color:#64748b;margin-bottom:4px;font-family:'Noto Sans Thai',sans-serif">ข้อมูลผู้ยืม</div>
+    <div style="display:flex;justify-content:space-between"><span style="color:#64748b">ชื่อ-นามสกุล:</span><span style="font-family:'Noto Sans Thai',sans-serif">คุณสมชาย ใจดี</span></div>
+    <div style="display:flex;justify-content:space-between"><span style="color:#64748b">เลขบัตรประชาชน:</span><span>1-2345-67890-12-3</span></div>
+    <div style="display:flex;justify-content:space-between"><span style="color:#64748b">เบอร์โทร:</span><span>081-234-5678</span></div>
+    <div style="display:flex;justify-content:space-between"><span style="color:#64748b">โรงพยาบาล:</span><span style="font-family:'Noto Sans Thai',sans-serif;text-align:right;max-width:55%">รพ.จุฬาลงกรณ์</span></div>
+    <div style="display:flex;justify-content:space-between"><span style="color:#64748b">แพทย์:</span><span style="font-family:'Noto Sans Thai',sans-serif">นพ.สมศักดิ์ ใจดี</span></div>
+    <div style="display:flex;justify-content:space-between"><span style="color:#64748b">HN:</span><span>HN-12345</span></div>
+    <div style="height:1px;background:#e2e8f0;margin:6px 0"></div>
+    <!-- ข้อมูลเครื่อง -->
+    <div style="font-size:10px;font-weight:800;color:#64748b;margin-bottom:4px;font-family:'Noto Sans Thai',sans-serif">ข้อมูลเครื่อง</div>
+    <div style="display:flex;justify-content:space-between"><span style="color:#64748b">รุ่น:</span><span style="font-weight:700">XT-AUTO</span></div>
+    <div style="display:flex;justify-content:space-between"><span style="color:#64748b">SN:</span><span style="font-weight:700">CADD3A00376</span></div>
+    <div style="display:flex;justify-content:space-between"><span style="color:#64748b">หน้ากาก:</span><span>WiZARD · ขนาด M</span></div>
+    <div style="height:1px;background:#e2e8f0;margin:6px 0"></div>
+    <!-- ตั้งค่าเครื่อง -->
+    <div style="font-size:10px;font-weight:800;color:#64748b;margin-bottom:4px;font-family:'Noto Sans Thai',sans-serif">ตั้งค่าเครื่อง</div>
+    <div style="display:flex;justify-content:space-between"><span style="color:#64748b">Pressure:</span><span>10 cmH2O</span></div>
+    <div style="display:flex;justify-content:space-between"><span style="color:#64748b">Ramp Pressure:</span><span>4 cmH2O</span></div>
+    <div style="display:flex;justify-content:space-between"><span style="color:#64748b">Ramp Time:</span><span>20 นาที</span></div>
+    <div style="height:1px;background:#e2e8f0;margin:6px 0"></div>
+    <!-- กำหนดคืน -->
+    <div style="display:flex;justify-content:space-between"><span style="color:#64748b">วันที่ออกเครื่อง:</span><span>24 มี.ค. 2026</span></div>
+    <div style="display:flex;justify-content:space-between"><span style="color:#64748b">กำหนดคืน:</span><span style="font-weight:700;color:#dc2626">6 เม.ย. 2026</span></div>
+    <div style="height:1px;background:#e2e8f0;margin:8px 0"></div>
+    <!-- ลายเซ็น -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px">
+      <div style="text-align:center">
+        <div style="height:32px;border-bottom:1px solid #94a3b8;margin-bottom:4px"></div>
+        <div style="font-size:10px;color:#64748b;font-family:'Noto Sans Thai',sans-serif">ลายเซ็นผู้ยืม</div>
+      </div>
+      <div style="text-align:center">
+        <div style="height:32px;border-bottom:1px solid #94a3b8;margin-bottom:4px"></div>
+        <div style="font-size:10px;color:#64748b;font-family:'Noto Sans Thai',sans-serif">ลายเซ็นเซลล์</div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:10px;font-size:10px;color:#94a3b8;font-family:'Noto Sans Thai',sans-serif">
+      เอกสารนี้เป็นสัญญายืมเครื่อง กรุณาคืนตามกำหนด
+    </div>
+  </div>
+
+  <!-- ปุ่มส่งออก -->
+
+<button class="btn-block btn-navy" onclick="C('m-print-loan');T('🖨️ ส่งพิมพ์แล้ว (QuestPDF)')">🖨️ พิมพ์ใบยืม</button>
+<button class="btn-block btn-purple" style="background:#7c3aed;color:#fff" onclick="C('m-print-loan');T('📱 ส่ง PDF ทาง LINE แล้ว')">📱 ส่ง PDF ทาง LINE</button>
+<button class="btn-block btn-danger" onclick="C('m-print-loan')">ปิด</button>
+
+</div></div>
+
+<div class="toast" id="toast"></div>
+<script>
+const PAGES=['pg-dash','pg-request','pg-loanform','pg-demo-detail','pg-warranty','pg-report','pg-history-sales','pg-my-machines','pg-cases']
+function G(id){PAGES.forEach(p=>{const e=document.getElementById(p);if(e)e.classList.remove('active')});const t=document.getElementById(id);if(t){t.classList.add('active');window.scrollTo(0,0)}}
+function O(id){document.getElementById(id).classList.add('open')}
+function C(id){document.getElementById(id).classList.remove('open')}
+function T(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2500)}
+
+let currentPool=‘sales’
+function selectPool(p){
+currentPool=p
+const sc=document.getElementById(‘pool-sales-card’)
+const dc=document.getElementById(‘pool-demo-card’)
+const fs=document.getElementById(‘form-sales’)
+const fd=document.getElementById(‘form-demo’)
+sc.style.border=p===‘sales’?‘2px solid #16a34a’:‘2px solid var(–sky-border)’
+sc.style.background=p===‘sales’?’#f0fdf4’:’#fff’
+dc.style.border=p===‘demo’?‘2px solid #1e40af’:‘2px solid var(–sky-border)’
+dc.style.background=p===‘demo’?’#eff6ff’:’#fff’
+fs.style.display=p===‘sales’?‘block’:‘none’
+fd.style.display=p===‘demo’?‘block’:‘none’
+}
+
+function loanTab(i,btn){
+[‘lt-0’,‘lt-1’,‘lt-2’].forEach((id,j)=>{
+const el=document.getElementById(id)
+if(el)el.style.display=j===i?‘block’:‘none’
+})
+btn.closest(’.segment-bar’).querySelectorAll(’.seg-btn’).forEach(b=>b.classList.remove(‘active’))
+btn.classList.add(‘active’)
+}
+
+const HOSPITALS = [
+‘โรงพยาบาลจุฬาลงกรณ์ สภากาชาดไทย’,‘โรงพยาบาลรามาธิบดี’,‘โรงพยาบาลศิริราช’,
+‘โรงพยาบาลพระมงกุฎเกล้า’,‘โรงพยาบาลภูมิพลอดุลยเดช’,‘โรงพยาบาลตำรวจ’,
+‘โรงพยาบาลเลิดสิน’,‘โรงพยาบาลนพรัตนราชธานี’,‘โรงพยาบาลบำราศนราดูร’,
+‘โรงพยาบาลเวชศาสตร์เขตร้อน’,‘โรงพยาบาลสมิติเวช สุขุมวิท’,‘โรงพยาบาลบำรุงราษฎร์’,
+‘โรงพยาบาลกรุงเทพ’,‘โรงพยาบาลเซ็นทรัลเยนเนอรัล’,‘โรงพยาบาลนครธน’
+]
+function showHospital(listId){
+document.getElementById(listId).style.display=‘block’
+}
+function hideHospital(listId){
+const el=document.getElementById(listId)
+if(el) el.style.display=‘none’
+}
+function filterHospital(input, listId){
+const v=input.value.toLowerCase()
+const list=document.getElementById(listId)
+if(!list) return
+list.style.display=‘block’
+list.querySelectorAll(’.h-opt’).forEach(opt=>{
+opt.style.display=opt.textContent.toLowerCase().includes(v)?‘block’:‘none’
+})
+}
+function pickHospital(inputId, listId, opt){
+const inp=document.getElementById(inputId)
+if(inp) inp.value=opt.textContent
+hideHospital(listId)
+}
+function searchDemoNo(){
+const v = document.getElementById(‘loan-demo-no’)?.value.trim()
+if(!v){ T(‘กรุณาพิมพ์ DemoNo เช่น D-001’); return }
+// mock — จริงๆ เรียก InventoryService.getInventoryByDemoNo(v)
+const mockData = {
+‘D-001’: { model: ‘XT-AUTO’, sn: ‘CADD3A00376’ },
+‘D-007’: { model: ‘APEX iX Auto’, sn: ‘CADD3A00390’ },
+‘D-012’: { model: ‘R-20i’, sn: ‘CADI3C01097’ }
+}
+const found = mockData[v.toUpperCase()]
+if(found){
+document.getElementById(‘loan-model-val’).textContent = found.model
+document.getElementById(‘loan-sn-val’).textContent = found.sn
+document.getElementById(‘loan-device-info’).style.display = ‘block’
+T(‘✅ พบ ’ + found.model + ’ · SN: ’ + found.sn)
+} else {
+document.getElementById(‘loan-device-info’).style.display = ‘none’
+T(‘❌ ไม่พบ DemoNo ’ + v + ’ ในระบบ’)
+}
+}
+function machTab(i,btn){
+[‘mt-0’,‘mt-1’,‘mt-2’].forEach((id,j)=>{const el=document.getElementById(id);if(el)el.style.display=j===i?‘block’:‘none’})
+btn.closest(’.segment-bar’).querySelectorAll(’.seg-btn’).forEach(b=>b.classList.remove(‘active’));btn.classList.add(‘active’)
+}
+function caseTab(i,btn){
+[‘ct-0’,‘ct-1’,‘ct-2’].forEach((id,j)=>{const el=document.getElementById(id);if(el)el.style.display=j===i?‘block’:‘none’})
+btn.closest(’.segment-bar’).querySelectorAll(’.seg-btn’).forEach(b=>b.classList.remove(‘active’));btn.classList.add(‘active’)
+}
+function searchDemoCase(){
+const v = document.getElementById(‘demo-search-no’)?.value.trim()
+if(!v){ T(‘กรุณาพิมพ์หมายเลขเครื่อง’); return }
+const mock = {
+‘A218’:  { model:‘XT-AUTO’,       sn:‘CADD3A00376’, humi:true  },
+‘D-001’: { model:‘XT-AUTO’,       sn:‘CADD3A00376’, humi:false },
+‘D-007’: { model:‘APEX iX Auto’,  sn:‘CADD3A00390’, humi:true  },
+‘D-012’: { model:‘R-20i’,         sn:‘CADI3C01097’, humi:false },
+}
+const found = mock[v.toUpperCase()] || mock[v]
+if(found){
+document.getElementById(‘demo-model-val’).textContent = found.model
+document.getElementById(‘demo-sn-val’).textContent = found.sn
+document.getElementById(‘demo-device-found’).style.display = ‘block’
+document.getElementById(‘demo-humidifier-section’).style.display = found.humi ? ‘block’ : ‘none’
+T(‘✅ พบ ’ + found.model + ’ · SN: ’ + found.sn)
+} else {
+document.getElementById(‘demo-device-found’).style.display = ‘none’
+T(‘❌ ไม่พบเครื่อง ’ + v + ’ หรือสถานะไม่ใช่ WithSales’)
+}
+}
+function submitAndPrint(){
+const found = document.getElementById(‘demo-device-found’).style.display !== ‘none’
+if(!found){ T(‘⚠️ กรุณาค้นหาเครื่องก่อน’); return }
+C(‘m-new-trial’)
+setTimeout(()=>O(‘m-print-loan’), 300)
+T(‘✅ บันทึกแล้ว · เปิดใบยืม…’)
+}
+function submitDemoCase(){
+const found = document.getElementById(‘demo-device-found’).style.display !== ‘none’
+if(!found){ T(‘⚠️ กรุณาค้นหาเครื่องก่อน’); return }
+C(‘m-new-trial’)
+T(‘✅ Demo Case สร้างแล้ว · Machine → WithPatient’)
+}
+function checkTrialReturn(cb){
+const sel=document.getElementById(‘sel-new-machine’)
+const price=document.getElementById(‘inp-price’)
+const btn=document.getElementById(‘btn-confirm-purchase’)
+if(cb.checked){
+sel.disabled=false; price.disabled=false; btn.disabled=false
+sel.options[0].text=’– เลือกเครื่องใหม่จาก Central Stock –’
+} else {
+sel.disabled=true; price.disabled=true; btn.disabled=true
+sel.options[0].text=’– ยืนยัน Step 1 ก่อน –’
+}
+}
+function addRow(containerId, label){
+const c=document.getElementById(containerId)
+const row=document.createElement(‘div’)
+row.style.cssText=‘display:flex;gap:8px;margin-bottom:8px’
+const isDevice=label.includes(‘เครื่อง’)
+if(isDevice){
+row.innerHTML=’<select class="form-input form-select" style="flex:2"><option>XT-AUTO</option><option>R-20i</option><option>APEX iX Auto</option></select><input class="form-input" type="number" value="1" style="flex:1">’
+} else {
+row.innerHTML=’<select class="form-input form-select" style="flex:2"><option>WiZARD S</option><option>AirFit F20</option><option>Filter F20</option><option>Standard Hose</option><option>WiZARD Headgear</option></select><input class="form-input" type="number" value="1" style="flex:1">’
+}
+c.appendChild(row)
+}
+</script>
+
+<!-- PAGE: HISTORY SALES -->
+
+<div class="ion-page" id="pg-history-sales">
+  <div class="ion-header"><div class="ion-toolbar">
+    <button class="back-btn" onclick="G('pg-dash')">←</button>
+    <div><div class="toolbar-title">📋 ประวัติของฉัน</div><div class="toolbar-sub">Activity Log</div></div>
+    <div class="avatar">แ</div>
+  </div></div>
+  <div class="ion-content">
+    <div class="list-item"><div class="item-icon" style="background:#dcfce7">💰</div><div class="item-body"><div class="item-title">Confirm Sale XT-AUTO</div><div class="item-sub">คุณสมหญิง · SN-A9876 · ฿28,500</div><div style="font-size:10px;color:#94a3b8;font-family:monospace">25 มี.ค. 09:00</div></div></div>
+    <div class="list-item"><div class="item-icon" style="background:#dbeafe">📦</div><div class="item-body"><div class="item-title">สร้าง LoanForm XT-AUTO</div><div class="item-sub">คุณสมชาย · รพ.จุฬาฯ · D-001</div><div style="font-size:10px;color:#94a3b8;font-family:monospace">20 มี.ค. 10:00</div></div></div>
+    <div class="list-item"><div class="item-icon" style="background:#fef3c7">🔄</div><div class="item-body"><div class="item-title">เปลี่ยนอุปกรณ์ LF-2026-015</div><div class="item-sub">เปลี่ยนหน้ากาก WiZARD S → WiZARD M</div><div style="font-size:10px;color:#94a3b8;font-family:monospace">18 มี.ค. 14:00</div></div></div>
+  </div>
+  <div class="ion-tab-bar">
+    <button class="ion-tab-btn" onclick="G('pg-dash')"><span class="tab-icon">🏠</span><span class="tab-lbl">หลัก</span></button>
+    <button class="ion-tab-btn" onclick="G('pg-request')"><span class="tab-icon">📋</span><span class="tab-lbl">ขอเบิก</span></button>
+    <button class="ion-tab-btn" onclick="G('pg-loanform')"><span class="tab-icon">📦</span><span class="tab-lbl">LoanForm</span></button>
+    <button class="ion-tab-btn" onclick="G('pg-warranty')"><span class="tab-icon">🛡️</span><span class="tab-lbl">Warranty</span></button>
+    <button class="ion-tab-btn tab-active"><span class="tab-icon">📊</span><span class="tab-lbl">รายงาน</span></button>
+  </div>
+</div>
+
+<!-- Modal: เปลี่ยนอุปกรณ์ระหว่างยืม (DeviceChangeDto) -->
+
+<div class="modal-overlay" id="m-device-change" onclick="C('m-device-change')"><div class="modal-sheet" onclick="event.stopPropagation()">
+  <div class="modal-handle"></div>
+  <div class="modal-title">🔄 เปลี่ยนอุปกรณ์ระหว่างยืม</div>
+  <div class="modal-sub">LF-2026-021 · คุณสมชาย · D-001 XT-AUTO</div>
+  <div style="background:#fef9c3;border-radius:10px;padding:10px;font-size:12px;color:#78350f;margin-bottom:14px">
+    ⚠️ ระบบจะบันทึก DeviceChangeHistory ไว้ตลอด สามารถดูย้อนหลังได้
+  </div>
+  <div class="form-group">
+    <label class="form-label">สิ่งที่เปลี่ยน *</label>
+    <select class="form-input" style="appearance:none">
+      <option>-- เลือกประเภท --</option>
+      <option>เปลี่ยนเครื่อง CPAP</option>
+      <option>เปลี่ยนหน้ากาก (MaskType)</option>
+      <option>เปลี่ยนขนาดหน้ากาก (MaskSize)</option>
+      <option>เปลี่ยน Humidifier</option>
+    </select>
+  </div>
+  <div class="form-group"><label class="form-label">จากเดิม</label><input class="form-input" placeholder="เช่น WiZARD S" value="WiZARD S"></div>
+  <div class="form-group"><label class="form-label">เปลี่ยนเป็น *</label><input class="form-input" placeholder="เช่น WiZARD M"></div>
+  <div class="form-group"><label class="form-label">เหตุผล</label><textarea class="form-input" rows="2" placeholder="เหตุผลที่เปลี่ยน..."></textarea></div>
+  <button class="btn-block btn-amber" onclick="C('m-device-change');T('✅ บันทึกการเปลี่ยนอุปกรณ์แล้ว')">✅ บันทึกการเปลี่ยน</button>
+  <button class="btn-block btn-danger" onclick="C('m-device-change')">ยกเลิก</button>
+</div></div>
+
+<!-- Modal: Convert LoanForm → Warranty -->
+
+<div class="modal-overlay" id="m-convert-warranty" onclick="C('m-convert-warranty')"><div class="modal-sheet" onclick="event.stopPropagation()">
+  <div class="modal-handle"></div>
+  <div class="modal-title">🛡️ แปลงใบยืม → Warranty</div>
+  <div class="modal-sub">LF-2026-021 · คุณสมชาย · D-001 XT-AUTO</div>
+  <div style="background:#f0fdf4;border-radius:10px;padding:10px;font-size:12px;color:#14532d;margin-bottom:14px">
+    ✅ ระบบดึงข้อมูลจาก LoanForm ให้อัตโนมัติ กรอกเพิ่มแค่ส่วนที่ขาด
+  </div>
+  <div class="info-row"><span class="info-key">ชื่อลูกค้า</span><span class="info-val">คุณสมชาย ใจดี ✅</span></div>
+  <div class="info-row"><span class="info-key">SN</span><span class="info-val" style="font-family:monospace">CADD3A00376 ✅</span></div>
+  <div class="info-row"><span class="info-key">โรงพยาบาล</span><span class="info-val">รพ.จุฬาฯ ✅</span></div>
+  <div class="form-group" style="margin-top:12px"><label class="form-label">ราคาขาย (PriceToPatient) *</label><input class="form-input" type="number" placeholder="฿" style="font-family:monospace"></div>
+  <div class="form-group"><label class="form-label">วันที่ขาย *</label><input class="form-input" type="date" value="2026-03-25"></div>
+  <div style="background:#f0fdf4;border-radius:10px;padding:10px;font-size:12px;color:#14532d;margin-bottom:8px">
+    🛡️ สร้าง WarrantyRecord อัตโนมัติ: ตัวเครื่อง 2 ปี · Humidifier 1 ปี · Mask 3 เดือน
+  </div>
+  <button class="btn-block btn-green" onclick="C('m-convert-warranty');T('✅ สร้าง WarrantyRecord แล้ว 3 รายการ')">🛡️ Convert → สร้าง Warranty</button>
+  <button class="btn-block btn-danger" onclick="C('m-convert-warranty')">ยกเลิก</button>
+</div></div>
+</body></html>
